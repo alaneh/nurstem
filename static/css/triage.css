@@ -185,3 +185,86 @@
     }
     .triage-header { text-align: center; }
 }
+
+/* =======================================================
+   CORRECCIÓN: FORMULARIO DE IDENTIFICACIÓN
+   ======================================================= */
+
+/* 1. Asegurar espacio entre cada campo */
+.triage-column .form-group {
+    margin-bottom: 1.2rem;
+    display: block;
+}
+
+/* 2. Estilizar Etiquetas (Labels) */
+.triage-column label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    color: #64748b; /* Gris suave */
+    font-weight: 600;
+}
+
+/* 3. Estilizar Inputs, Selects y Textarea para que se vean modernos */
+.triage-column .form-input, 
+.triage-column .form-select,
+.triage-column textarea {
+    width: 100%;             /* Ocupar todo el ancho disponible */
+    padding: 0.75rem;        /* Más espacio interno */
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;      /* Bordes redondeados */
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: #0D3B66;          /* Color oscuro de tu paleta */
+    background-color: #ffffff;
+    box-sizing: border-box;  /* Evita que el padding rompa el ancho */
+    transition: all 0.2s;
+}
+
+/* Efecto al hacer clic (Focus) */
+.triage-column .form-input:focus, 
+.triage-column .form-select:focus,
+.triage-column textarea:focus {
+    outline: none;
+    border-color: #1F4E79; /* Azul primario */
+    box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.1); /* Resplandor azul suave */
+}
+
+/* 4. Arreglar la fila del Buscador (Input + Botón) */
+.search-row {
+    display: flex;
+    gap: 0.5rem; /* Espacio entre input y botón */
+    align-items: stretch; /* Estirar altura para que coincidan */
+}
+
+.search-row .form-input {
+    flex-grow: 1; /* El input toma todo el espacio posible */
+}
+
+.search-row .btn-secondary {
+    padding: 0 1.2rem;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #1F4E79;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap; /* Evita que el texto se rompa */
+    transition: background 0.2s;
+}
+
+.search-row .btn-secondary:hover {
+    background-color: #e2e8f0;
+    border-color: #94a3b8;
+}
+
+/* 5. Utilidad para filas divididas (Edad / Género) */
+.form-row {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.col-half {
+    flex: 1; /* Ambos ocupan 50% */
+}
