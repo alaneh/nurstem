@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Consumo - Nurstem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/nurse.css"> <link rel="stylesheet" href="css/consumption.css"> </head>
+<body>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>Nurstem</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="user_dashboard.html" class="nav-link">Mis Pacientes</a>
+                <a href="consumo_insumos.html" class="nav-link active">Solicitar Insumos</a>
+                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
+                <a href="triage_ingreso.html" class="nav-link">Admisión Urgencias</a>
+                <div class="nav-separator"></div>
+                <a href="#" class="nav-link">Cerrar Turno</a>
+            </nav>
+            
+            <div class="user-profile-widget">
+                <div class="avatar-circle">LE</div>
+                <div class="profile-info">
+                    <span class="profile-name">Lula Enfermera</span>
+                    <span class="profile-role">Jefe de Pediatría</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area clean-padding">
+            
+            <div class="pos-layout">
+                
+                <section class="catalog-section">
+                    
+                    <div class="catalog-header">
+                        <div class="location-badge">
+                            <span class="dot"></span>
+                            Ubicación: Isla Pediatría (Piso 1)
+                        </div>
+                        <h1>Tomar Insumos / Medicamentos</h1>
+                        
+                        <div class="search-wrapper">
+                            <input type="text" class="big-search" placeholder="🔍 Escanear código o buscar producto...">
+                        </div>
+
+                        <div class="quick-filters">
+                            <button class="filter-chip active">Todo</button>
+                            <button class="filter-chip">💊 Medicamentos</button>
+                            <button class="filter-chip">💉 Material Curación</button>
+                            <button class="filter-chip">🧴 Soluciones</button>
+                        </div>
+                    </div>
+
+                    <div class="products-grid">
+                        
+                        <div class="product-card" onclick="addToCart('Paracetamol 500mg', 'Tabs')">
+                            <div class="stock-indicator stock-ok">Stock: 45</div>
+                            <div class="product-icon">💊</div>
+                            <div class="product-details">
+                                <h4>Paracetamol 500mg</h4>
+                                <p>Caja / Tabletas</p>
+                            </div>
+                            <button class="btn-add">+</button>
+                        </div>
+
+                        <div class="product-card" onclick="addToCart('Jeringa 5ml', 'Pza')">
+                            <div class="stock-indicator stock-ok">Stock: 120</div>
+                            <div class="product-icon">💉</div>
+                            <div class="product-details">
+                                <h4>Jeringa 5ml</h4>
+                                <p>Material Estéril</p>
+                            </div>
+                            <button class="btn-add">+</button>
+                        </div>
+
+                        <div class="product-card card-low-stock" onclick="addToCart('Gasas Estériles', 'Paq')">
+                            <div class="stock-indicator stock-warning">Stock: 5</div>
+                            <div class="product-icon">🩹</div>
+                            <div class="product-details">
+                                <h4>Gasas Estériles 10x10</h4>
+                                <p>Paquete Individual</p>
+                            </div>
+                            <button class="btn-add">+</button>
+                        </div>
+
+                        <div class="product-card" onclick="addToCart('Sol. Salina 0.9%', 'Bolsa')">
+                            <div class="stock-indicator stock-ok">Stock: 15</div>
+                            <div class="product-icon">💧</div>
+                            <div class="product-details">
+                                <h4>Sol. Salina 0.9%</h4>
+                                <p>Bolsa 500ml</p>
+                            </div>
+                            <button class="btn-add">+</button>
+                        </div>
+
+                        <div class="product-card" onclick="addToCart('Ketorolaco 30mg', 'Amp')">
+                            <div class="stock-indicator stock-ok">Stock: 20</div>
+                            <div class="product-icon">💊</div>
+                            <div class="product-details">
+                                <h4>Ketorolaco 30mg</h4>
+                                <p>Ampolleta</p>
+                            </div>
+                            <button class="btn-add">+</button>
+                        </div>
+
+                        <div class="product-card" onclick="addToCart('Guantes Latex M', 'Par')">
+                            <div class="stock-indicator stock-ok">Stock: 200</div>
+                            <div class="product-icon">🧤</div>
+                            <div class="product-details">
+                                <h4>Guantes Latex (M)</h4>
+                                <p>Par Estéril</p>
+                            </div>
+                            <button class="btn-add">+</button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <aside class="cart-panel">
+                    <div class="cart-header">
+                        <h3>Lista de Retiro</h3>
+                        <span class="cart-count" id="cartCount">2 items</span>
+                    </div>
+
+                    <div class="cart-items-container">
+                        
+                        <div class="cart-item">
+                            <div class="cart-item-info">
+                                <strong>Paracetamol 500mg</strong>
+                                <small>Tabs</small>
+                            </div>
+                            <div class="qty-control">
+                                <button class="btn-qty">-</button>
+                                <input type="number" value="2" readonly>
+                                <button class="btn-qty">+</button>
+                            </div>
+                            <button class="btn-remove">×</button>
+                        </div>
+
+                        <div class="cart-item">
+                            <div class="cart-item-info">
+                                <strong>Jeringa 5ml</strong>
+                                <small>Pza</small>
+                            </div>
+                            <div class="qty-control">
+                                <button class="btn-qty">-</button>
+                                <input type="number" value="1" readonly>
+                                <button class="btn-qty">+</button>
+                            </div>
+                            <button class="btn-remove">×</button>
+                        </div>
+
+                    </div>
+
+                    <div class="cart-footer">
+                        <div class="assignment-selector">
+                            <label>Asignar a Paciente (Opcional)</label>
+                            <select class="form-select">
+                                <option value="">-- Uso General / Stock Carrito --</option>
+                                <option value="1">Cama 101 - María Antonieta</option>
+                                <option value="2">Cama 102 - Roberto Gómez</option>
+                            </select>
+                        </div>
+                        <button class="btn-checkout">Confirmar Retiro</button>
+                    </div>
+                </aside>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Script simple para simular interacción UI
+        function addToCart(name, type) {
+            // Aquí iría la lógica para agregar al DOM del carrito
+            alert(`Producto agregado: ${name}`);
+        }
+    </script>
+</body>
+</html>

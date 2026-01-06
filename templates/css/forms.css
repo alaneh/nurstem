@@ -1,0 +1,336 @@
+/* =========================================
+   ESTILOS DE FORMULARIOS CLÍNICOS
+   ========================================= */
+
+/* Sidebar Colapsado (Override) */
+.sidebar-collapsed {
+    width: 60px;
+    align-items: center;
+}
+.brand-icon {
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 800;
+    padding: 1rem 0;
+}
+.nav-link-icon {
+    font-size: 1.5rem;
+    padding: 1rem 0;
+    text-align: center;
+    width: 100%;
+    color: #cbd5e1;
+    text-decoration: none;
+}
+.nav-link-icon:hover, .nav-link-icon.active {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* 1. Patient Banner (Sticky) */
+.patient-banner {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: var(--color-primary-dark);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.banner-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.btn-back {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.btn-back:hover { color: white; }
+
+.patient-identity h2 {
+    font-size: 1.2rem;
+    margin: 0;
+    color: white;
+}
+.patient-sub {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.banner-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.info-pill {
+    background-color: rgba(255,255,255,0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.pill-alert {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+.pill-alert .pill-label { color: #b91c1c; }
+
+.pill-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #cbd5e1;
+}
+.pill-value {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+/* 2. Contenedor del Formulario */
+.form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.form-header-row h3 { color: var(--color-primary); }
+.timestamp { color: #64748b; font-size: 0.9rem; }
+
+/* 3. Clinical Cards (Secciones) */
+.clinical-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.card-title {
+    font-size: 1rem;
+    color: var(--color-secondary);
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Grid de Signos Vitales */
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.2rem;
+}
+
+.input-wrapper label {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+}
+
+.input-clinical {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1.1rem; /* Texto grande para números */
+    font-family: var(--font-base);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+}
+
+.input-clinical:focus {
+    border-color: var(--color-accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(111, 163, 216, 0.1);
+}
+
+/* Input Compuesto (120 / 80) */
+.input-group-merged {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.separator { font-weight: 700; color: #94a3b8; }
+
+.highlight-input {
+    background-color: #f0f9ff;
+    border-color: var(--color-accent);
+}
+
+/* Lista de Medicamentos */
+.meds-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.med-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+.med-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.med-time {
+    font-weight: 700;
+    color: var(--color-primary);
+    background-color: #e0f2fe;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.med-details {
+    display: flex;
+    flex-direction: column;
+}
+.med-details strong { color: var(--color-text-body); font-size: 0.95rem; }
+.med-details small { color: #64748b; font-size: 0.8rem; }
+
+/* Botón Checkbox Personalizado */
+.med-checkbox { display: none; } /* Ocultar default */
+
+.btn-check {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.med-checkbox:checked + .btn-check {
+    background-color: #16a34a; /* Verde */
+    color: white;
+    border-color: #16a34a;
+}
+.med-checkbox:checked + .btn-check::before {
+    content: "✓ ";
+}
+
+.item-future { opacity: 0.7; }
+.status-pending { font-size: 0.8rem; color: #94a3b8; font-style: italic; }
+
+/* Balance de Líquidos */
+.balance-container {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.balance-column {
+    flex: 1;
+    min-width: 200px;
+}
+
+.balance-column h5 {
+    font-size: 0.9rem;
+    color: var(--color-primary);
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.3rem;
+}
+
+.col-in h5 { border-color: #3b82f6; } /* Azul */
+.col-out h5 { border-color: #ef4444; } /* Rojo */
+
+.input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+.input-row label { font-size: 0.85rem; color: #475569; }
+
+.input-small {
+    width: 80px;
+    padding: 0.4rem;
+    text-align: right;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.balance-total {
+    width: 100%;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #cbd5e1;
+    text-align: right;
+    font-size: 1.1rem;
+    color: var(--color-primary-dark);
+}
+
+/* Textarea Notas */
+.note-area {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: var(--font-base);
+    resize: vertical;
+}
+
+/* Footer Actions */
+.form-actions-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-bottom: 3rem; /* Espacio extra abajo */
+}
+
+.btn-large {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .patient-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .banner-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .vitals-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}

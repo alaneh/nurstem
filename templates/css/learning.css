@@ -1,0 +1,293 @@
+/* =========================================
+   ESTILOS DE APRENDIZAJE (PORTAL USUARIO)
+   ========================================= */
+
+/* Hero Section */
+.learning-hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(31, 78, 121, 0.2);
+}
+
+.hero-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.hero-content p {
+    color: #e2e8f0;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+}
+
+.progress-stats {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-val {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.stat-lbl {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #cbd5e1;
+    letter-spacing: 0.05em;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 40px;
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Gráfico Circular Simple (CSS) */
+.hero-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(var(--color-accent) 50%, rgba(255,255,255,0.1) 0); /* 50% hardcoded visual */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-circle::after {
+    content: '';
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    background-color: var(--color-primary-dark);
+    border-radius: 50%;
+}
+
+.progress-circle span {
+    position: relative;
+    z-index: 2;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.chart-caption {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+}
+
+/* Tabs */
+.tabs-nav {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-family: var(--font-base);
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover { color: var(--color-primary); }
+
+.tab-btn.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.tab-section {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+.active-section { display: block; }
+.section-heading { color: var(--color-primary-dark); margin-bottom: 1.5rem; font-size: 1.2rem; }
+
+/* Grid de Cursos */
+.learning-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.learn-card {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.learn-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.card-cover {
+    height: 100px;
+    position: relative;
+    padding: 1rem;
+}
+.cover-blue { background: linear-gradient(to right, #3b82f6, #60a5fa); }
+.cover-pink { background: linear-gradient(to right, #ec4899, #f472b6); }
+.cover-orange { background: linear-gradient(to right, #f97316, #fb923c); }
+
+.badge-type {
+    background-color: rgba(0,0,0,0.3);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-content h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-body);
+}
+
+.card-content p {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.card-meta {
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.btn-enroll {
+    width: 100%;
+    padding: 0.7rem;
+    background-color: white;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-enroll:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Mis Cursos (Fila Activa) */
+.active-course-row {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.course-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #f0f9ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.course-info-main {
+    flex-grow: 1;
+    min-width: 200px;
+}
+.course-info-main h4 { margin-bottom: 0.2rem; color: var(--color-primary-dark); }
+.course-dates { font-size: 0.85rem; color: #64748b; }
+
+.course-progress-wrapper {
+    width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.progress-pct { font-weight: 700; font-size: 0.9rem; color: var(--color-primary); }
+
+.btn-continue {
+    padding: 0.6rem 1.2rem;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Tablas y Evaluaciones */
+.bg-white { background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 2rem; }
+.btn-text-icon { background: none; border: none; color: var(--color-accent); cursor: pointer; font-weight: 500; }
+.btn-text-icon:hover { text-decoration: underline; }
+
+.evaluation-summary {
+    background-color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--color-secondary);
+}
+.evaluation-summary h4 { color: var(--color-primary); margin-bottom: 0.5rem; }
+.evaluation-summary p { margin-bottom: 1rem; font-size: 0.9rem; color: #64748b; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .learning-hero { flex-direction: column; text-align: center; gap: 1.5rem; }
+    .hero-content p { margin: 0 auto 1.5rem; }
+    .progress-stats { justify-content: center; }
+    .active-course-row { flex-direction: column; align-items: flex-start; }
+    .course-progress-wrapper { width: 100%; }
+    .btn-continue { width: 100%; }
+}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triage y Admisión - Nurstem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/nurse.css"> 
+    <link rel="stylesheet" href="css/forms.css"> <link rel="stylesheet" href="css/triage.css"> </head>
+<body>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>Nurstem</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="user_dashboard.html" class="nav-link">Mis Pacientes</a>
+                <a href="consumo_insumos.html" class="nav-link">Solicitar Insumos</a>
+                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
+                <a href="triage_ingreso.html" class="nav-link active">Admisión Urgencias</a>
+                <div class="nav-separator"></div>
+                <a href="#" class="nav-link">Cerrar Turno</a>
+            </nav>
+            
+            <div class="user-profile-widget">
+                <div class="avatar-circle">HE</div>
+                <div class="profile-info">
+                    <span class="profile-name">Hola Enfermera</span>
+                    <span class="profile-role">Recepción Urgencias</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            
+            <div class="triage-wrapper">
+                
+                <div class="triage-header">
+                    <h1>Valoración Triage</h1>
+                    <p>Clasificación de riesgo para atención médica</p>
+                </div>
+
+                <form action="#" method="POST" id="triageForm">
+                    
+                    <div class="triage-layout">
+                        
+                        <div class="triage-column">
+                            <h3 class="column-title">1. Identificación</h3>
+                            
+                            <div class="card-white">
+                                <div class="form-group">
+                                    <label>Buscar Paciente (Historial)</label>
+                                    <div class="search-row">
+                                        <input type="text" class="form-input" placeholder="Nombre o CURP...">
+                                        <button type="button" class="btn-secondary">Buscar</button>
+                                    </div>
+                                </div>
+                                <hr class="divider">
+                                <div class="form-group">
+                                    <label>Nombre(s) *</label>
+                                    <input type="text" class="form-input" required placeholder="Nombre del paciente">
+                                </div>
+                                <div class="form-group">
+                                    <label>Apellidos *</label>
+                                    <input type="text" class="form-input" required placeholder="Apellidos">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-half">
+                                        <label>Edad</label>
+                                        <input type="number" class="form-input" placeholder="Años">
+                                    </div>
+                                    <div class="form-group col-half">
+                                        <label>Género</label>
+                                        <select class="form-select">
+                                            <option>Masculino</option>
+                                            <option>Femenino</option>
+                                            <option>Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Motivo de Consulta (Queja Principal) *</label>
+                                    <textarea class="form-input" rows="3" placeholder="Ej. Dolor torácico opresivo, dificultad para respirar..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="triage-column">
+                            <h3 class="column-title">2. Signos Vitales</h3>
+                            
+                            <div class="card-white">
+                                <div class="vitals-grid-triage">
+                                    
+                                    <div class="vital-input-group">
+                                        <label>Frec. Cardiaca</label>
+                                        <input type="number" id="hr" class="input-clinical" placeholder="lpm" oninput="autoTriage()">
+                                    </div>
+
+                                    <div class="vital-input-group">
+                                        <label>Sat. Oxígeno %</label>
+                                        <input type="number" id="spo2" class="input-clinical" placeholder="%" oninput="autoTriage()">
+                                    </div>
+
+                                    <div class="vital-input-group">
+                                        <label>Temp. °C</label>
+                                        <input type="number" id="temp" class="input-clinical" placeholder="°C" step="0.1" oninput="autoTriage()">
+                                    </div>
+
+                                    <div class="vital-input-group">
+                                        <label>T.A. Sistólica</label>
+                                        <input type="number" id="sys" class="input-clinical" placeholder="mmHg">
+                                    </div>
+
+                                    <div class="vital-input-group">
+                                        <label>T.A. Diastólica</label>
+                                        <input type="number" id="dia" class="input-clinical" placeholder="mmHg">
+                                    </div>
+
+                                    <div class="vital-input-group">
+                                        <label>Escala Dolor (0-10)</label>
+                                        <input type="number" id="pain" class="input-clinical" placeholder="EVA" max="10" oninput="autoTriage()">
+                                    </div>
+                                    
+                                    <div class="vital-input-group">
+                                        <label>Glucosa (mg/dL)</label>
+                                        <input type="number" class="input-clinical" placeholder="Opcional">
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="triage-column">
+                            <h3 class="column-title">3. Clasificación</h3>
+                            
+                            <div class="triage-selector-container">
+                                
+                                <label class="triage-option option-red">
+                                    <input type="radio" name="triageLevel" value="1" id="radioRed">
+                                    <div class="triage-card">
+                                        <div class="level-number">I</div>
+                                        <div class="level-info">
+                                            <strong>Emergencia (Rojo)</strong>
+                                            <span>Atención Inmediata</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="triage-option option-orange">
+                                    <input type="radio" name="triageLevel" value="2" id="radioOrange">
+                                    <div class="triage-card">
+                                        <div class="level-number">II</div>
+                                        <div class="level-info">
+                                            <strong>Urgencia (Naranja)</strong>
+                                            <span>&lt; 15 minutos</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="triage-option option-yellow">
+                                    <input type="radio" name="triageLevel" value="3" id="radioYellow">
+                                    <div class="triage-card">
+                                        <div class="level-number">III</div>
+                                        <div class="level-info">
+                                            <strong>Urgencia Menor (Amarillo)</strong>
+                                            <span>&lt; 30 minutos</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="triage-option option-green">
+                                    <input type="radio" name="triageLevel" value="4" id="radioGreen">
+                                    <div class="triage-card">
+                                        <div class="level-number">IV</div>
+                                        <div class="level-info">
+                                            <strong>No Urgente (Verde)</strong>
+                                            <span>&lt; 120 minutos</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="triage-option option-blue">
+                                    <input type="radio" name="triageLevel" value="5" id="radioBlue">
+                                    <div class="triage-card">
+                                        <div class="level-number">V</div>
+                                        <div class="level-info">
+                                            <strong>Consulta (Azul)</strong>
+                                            <span>&lt; 180 minutos</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                            </div>
+
+                            <div class="triage-footer">
+                                <div class="suggestion-box" id="suggestionBox" style="display: none;">
+                                    ⚠️ Sugerencia: <strong>Nivel Rojo</strong> por SatO2 baja.
+                                </div>
+                                <button type="submit" class="btn-primary btn-block-large">Confirmar e Ingresar Paciente</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function autoTriage() {
+            const hr = parseInt(document.getElementById('hr').value) || 0;
+            const spo2 = parseInt(document.getElementById('spo2').value) || 100;
+            const temp = parseFloat(document.getElementById('temp').value) || 36;
+            const pain = parseInt(document.getElementById('pain').value) || 0;
+            
+            let suggestion = null;
+            let levelId = 'radioGreen'; // Default
+
+            // Lógica simple de ejemplo para UT 113
+            if (spo2 < 90 || hr > 130 || hr < 40) {
+                suggestion = "Nivel Rojo (Signos Vitales Críticos)";
+                levelId = 'radioRed';
+            } else if (spo2 < 94 || hr > 110 || temp > 39 || pain >= 8) {
+                suggestion = "Nivel Naranja (Dolor Severo o Fiebre Alta)";
+                levelId = 'radioOrange';
+            } else if (pain >= 5 || temp > 38) {
+                suggestion = "Nivel Amarillo (Sintomático)";
+                levelId = 'radioYellow';
+            }
+
+            // Mostrar sugerencia visual
+            const box = document.getElementById('suggestionBox');
+            if (suggestion) {
+                box.innerHTML = "⚠️ Sistema sugiere: <strong>" + suggestion + "</strong>";
+                box.style.display = 'block';
+                document.getElementById(levelId).checked = true; // Auto-seleccionar
+            } else {
+                box.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

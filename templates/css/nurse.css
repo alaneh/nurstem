@@ -1,0 +1,306 @@
+/* =========================================
+   ESTILOS DE ENFERMERÍA (OPERATIVO)
+   ========================================= */
+
+.nurse-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Sidebar Profile Widget */
+.nav-separator {
+    height: 1px;
+    background-color: rgba(255,255,255,0.1);
+    margin: 1rem 1.5rem;
+}
+
+.user-profile-widget {
+    margin-top: auto; /* Empuja al fondo del sidebar */
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-name {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.profile-role {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+/* Encabezado de Turno */
+.shift-header {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.shift-info h1 {
+    font-size: 1.5rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.shift-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge-pill {
+    padding: 0.4rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-blue { background-color: #e0f2fe; color: #0369a1; }
+.badge-purple { background-color: #f3e8ff; color: #7e22ce; }
+
+.btn-secondary {
+    background: white;
+    border: 1px solid var(--color-secondary);
+    color: var(--color-secondary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Resumen de Tareas */
+.tasks-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.task-card {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid #cbd5e1; /* Borde default */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.task-urgent {
+    border-left-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+.task-icon {
+    font-size: 1.5rem;
+}
+
+.task-text {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+}
+.task-text strong { color: var(--color-primary-dark); }
+.task-text span { color: #64748b; font-size: 0.8rem; }
+
+/* Grid de Pacientes */
+.section-title {
+    font-size: 1.2rem;
+    color: var(--color-secondary);
+    margin-bottom: -0.5rem;
+}
+
+.patient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.patient-card {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #f1f5f9;
+    transition: transform 0.2s;
+}
+
+.patient-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.patient-header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bed-indicator {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.8);
+}
+.dot-stable { background-color: #22c55e; }
+.dot-warning { background-color: #f59e0b; animation: pulse 2s infinite; }
+
+.patient-body {
+    padding: 1.2rem;
+    flex-grow: 1;
+}
+
+.patient-name {
+    font-size: 1.1rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 0.3rem;
+}
+
+.patient-dx {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+/* Vitals Preview */
+.vitals-preview {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f8fafc;
+    padding: 0.5rem;
+    border-radius: 6px;
+}
+
+.vital-item {
+    display: flex;
+    flex-direction: column;
+}
+.vital-item .label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
+.vital-item .value { font-weight: 700; color: var(--color-primary); }
+
+.alerts-container {
+    margin-top: 0.5rem;
+}
+
+.alert-tag {
+    background-color: #fee2e2;
+    color: #991b1b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Acciones de la Tarjeta */
+.patient-actions {
+    padding: 1rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-base);
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.primary-action {
+    background-color: var(--color-primary);
+    color: white;
+}
+.primary-action:hover { background-color: var(--color-primary-dark); }
+
+.secondary-action {
+    background-color: white;
+    border: 1px solid #cbd5e1;
+    color: var(--color-text-body);
+}
+.secondary-action:hover { background-color: #f1f5f9; }
+
+/* Estilos especiales para tarjeta de Alta */
+.card-discharge .patient-header {
+    background-color: #cbd5e1; /* Gris */
+}
+.tag-success {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.discharge-note {
+    font-size: 0.9rem;
+    color: #ea580c; /* Naranja oscuro */
+    background-color: #ffedd5;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+.success-action {
+    background-color: #16a34a;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .shift-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .shift-actions {
+        width: 100%;
+    }
+    .btn-secondary {
+        width: 100%;
+    }
+}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Turno - Nurstem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/nurse.css"> </head>
+<body>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>Nurstem</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="user_dashboard.html" class="nav-link active">Mis Pacientes</a>
+                <a href="consumo_insumos.html" class="nav-link">Solicitar Insumos</a>
+                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
+                <a href="triage_ingreso.html" class="nav-link">Admisión Urgencias</a>
+                <div class="nav-separator"></div>
+                <a href="#" class="nav-link">Cerrar Turno</a>
+            </nav>
+            
+            <div class="user-profile-widget">
+                <div class="avatar-circle">LE</div>
+                <div class="profile-info">
+                    <span class="profile-name">Lula Enfermera</span>
+                    <span class="profile-role">Jefe de Pediatría</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            
+            <div class="nurse-container">
+                
+                <div class="shift-header">
+                    <div class="shift-info">
+                        <h1>Tablero de Guardia</h1>
+                        <div class="shift-badges">
+                            <span class="badge-pill badge-blue">Turno Matutino (08:00 - 19:00)</span>
+                            <span class="badge-pill badge-purple">Área Asignada: Piso 1 Pediatría</span>
+                        </div>
+                    </div>
+                    <div class="shift-actions">
+                        <button class="btn-secondary">📣 Reportar Incidencia</button>
+                    </div>
+                </div>
+
+                <div class="tasks-summary">
+                    <div class="task-card task-urgent">
+                        <span class="task-icon">⏰</span>
+                        <div class="task-text">
+                            <strong>Medicamentos</strong>
+                            <span>2 pendientes para las 12:00</span>
+                        </div>
+                    </div>
+                    <div class="task-card">
+                        <span class="task-icon">💗</span>
+                        <div class="task-text">
+                            <strong>Signos Vitales</strong>
+                            <span>Toma programada 14:00</span>
+                        </div>
+                    </div>
+                    <div class="task-card">
+                        <span class="task-icon">💧</span>
+                        <div class="task-text">
+                            <strong>Balances Hídricos</strong>
+                            <span>Al día</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Pacientes a mi cargo (4)</h3>
+                
+                <div class="patient-grid">
+                    
+                    <div class="patient-card">
+                        <div class="patient-header">
+                            <div class="bed-indicator">Cama 101</div>
+                            <span class="status-dot dot-stable" title="Estable"></span>
+                        </div>
+                        <div class="patient-body">
+                            <h4 class="patient-name">María Antonieta de las Nieves</h4>
+                            <p class="patient-dx">Dx: Neumonía adquirida en comunidad</p>
+                            
+                            <div class="vitals-preview">
+                                <div class="vital-item">
+                                    <span class="label">Temp</span>
+                                    <span class="value">38.5°C</span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="label">SpO2</span>
+                                    <span class="value">92%</span>
+                                </div>
+                            </div>
+
+                            <div class="alerts-container">
+                                <span class="alert-tag">Alergia: Penicilina</span>
+                            </div>
+                        </div>
+                        <div class="patient-actions">
+                            <a href="hoja_enfermeria.html" class="btn-action primary-action">Hoja de Enfermería</a>
+                            <button class="btn-action secondary-action">Ver Kardex</button>
+                        </div>
+                    </div>
+
+                    <div class="patient-card">
+                        <div class="patient-header">
+                            <div class="bed-indicator">Cama 102</div>
+                            <span class="status-dot dot-warning" title="Atención Requerida"></span>
+                        </div>
+                        <div class="patient-body">
+                            <h4 class="patient-name">Roberto Gómez</h4>
+                            <p class="patient-dx">Dx: Post-operatorio Apendicectomía</p>
+                            
+                            <div class="vitals-preview">
+                                <div class="vital-item">
+                                    <span class="label">TA</span>
+                                    <span class="value">110/70</span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="label">Dolor</span>
+                                    <span class="value">7/10</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="patient-actions">
+                            <a href="hoja_enfermeria.html" class="btn-action primary-action">Hoja de Enfermería</a>
+                            <button class="btn-action secondary-action">Ver Kardex</button>
+                        </div>
+                    </div>
+
+                    <div class="patient-card card-discharge"> <div class="patient-header">
+                            <div class="bed-indicator">Cama 104</div>
+                            <span class="status-tag tag-success">Alta Médica</span>
+                        </div>
+                        <div class="patient-body">
+                            <h4 class="patient-name">Carlos Villagrán</h4>
+                            <p class="patient-dx">Dx: Gastroenteritis Aguda</p>
+                            <p class="discharge-note">Pendiente: Retirar vía y firmar egreso.</p>
+                        </div>
+                        <div class="patient-actions">
+                            <button class="btn-action success-action">Procesar Egreso</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>
