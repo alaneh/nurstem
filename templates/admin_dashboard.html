@@ -4,28 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard General - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/dashboard.css"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
 <body>
 
     <div class="main-layout">
         
         <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
+            <div class="brand"><h2>Nurstem</h2></div>
             <nav class="nav-menu">
-                <a href="admin_dashboard.html" class="nav-link active">Dashboard</a>
-                <a href="admin_personal.html" class="nav-link">Personal</a>
-                <a href="admin_pacientes.html" class="nav-link">Pacientes</a>
-                <a href="admin_asignaciones.html" class="nav-link">Asignaciones</a>
-                <a href="admin_inventario.html" class="nav-link">Inventario</a>
-                <a href="admin_capacitacion.html" class="nav-link">Capacitación</a>
-                <a href="#" class="nav-link">Cerrar Sesión</a>
+                <a href="{{ url_for('admin_personal') }}" class="nav-link">Personal</a>
+                <a href="{{ url_for('admin_pacientes') }}" class="nav-link">Pacientes</a>
+                <a href="{{ url_for('admin_asignaciones') }}" class="nav-link">Asignaciones</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">Dashboard</a>
+                <a href="{{ url_for('admin_capacitacion') }}" class="nav-link">Capacitación</a>
+                <a href="{{ url_for('admin_inventario') }}" class="nav-link">Inventario</a>
             </nav>
         </aside>
 
@@ -35,11 +30,11 @@
                 
                 <div class="dashboard-header">
                     <div>
-                        <h1>Panel de Control General</h1>
-                        <p>Resumen operativo del Hospital Casa Alivio del Sufrimiento</p>
+                        <h1>Panel de Control</h1>
+                        <p>Resumen operativo en tiempo real</p>
                     </div>
                     <div class="date-indicator">
-                        <span id="currentDate">Martes, 06 Enero 2026</span>
+                        <span id="currentDate">{{ fecha_actual }}</span>
                     </div>
                 </div>
 
@@ -47,27 +42,27 @@
                     <div class="card kpi-card">
                         <div class="kpi-icon icon-blue">🛏️</div>
                         <div class="kpi-info">
-                            <h3>Ocupación Global</h3>
-                            <p class="kpi-value">85%</p>
-                            <span class="kpi-sub">12 camas disponibles</span>
+                            <h3>Pacientes Ingresados</h3>
+                            <p class="kpi-value">{{ total_pacientes }}</p>
+                            <span class="kpi-sub">Total Hospital</span>
                         </div>
                     </div>
                     
                     <div class="card kpi-card">
                         <div class="kpi-icon icon-red">🚑</div>
                         <div class="kpi-info">
-                            <h3>Urgencias (Espera)</h3>
-                            <p class="kpi-value">8</p>
-                            <span class="kpi-sub">2 Prioridad Alta (Rojo)</span>
+                            <h3>Urgencias</h3>
+                            <p class="kpi-value">{{ urgencias_count }}</p>
+                            <span class="kpi-sub">En valoración</span>
                         </div>
                     </div>
 
                     <div class="card kpi-card">
                         <div class="kpi-icon icon-green">👩‍⚕️</div>
                         <div class="kpi-info">
-                            <h3>Personal Activo</h3>
-                            <p class="kpi-value">24</p>
-                            <span class="kpi-sub">Turno Matutino</span>
+                            <h3>Enfermería Activa</h3>
+                            <p class="kpi-value">{{ total_enfermeros }}</p>
+                            <span class="kpi-sub">Personal en turno</span>
                         </div>
                     </div>
 
@@ -75,8 +70,8 @@
                         <div class="kpi-icon icon-orange">⚠️</div>
                         <div class="kpi-info">
                             <h3>Alertas Stock</h3>
-                            <p class="kpi-value">5</p>
-                            <span class="kpi-sub">Medicamentos bajos</span>
+                            <p class="kpi-value">{{ count_alertas }}</p>
+                            <span class="kpi-sub">Insumos críticos</span>
                         </div>
                     </div>
                 </div>
@@ -88,109 +83,75 @@
                         <div class="card section-card">
                             <div class="card-header">
                                 <h3>Ocupación por Área</h3>
-                                <a href="admin_asignaciones.html" class="btn-text">Ver detalle &rarr;</a>
                             </div>
                             <div class="occupancy-list">
+                                {% for area in ocupacion_data %}
                                 <div class="occupancy-item">
                                     <div class="area-info">
-                                        <span>Piso 1: Pediatría</span>
-                                        <span class="percentage">90%</span>
+                                        <span>{{ area.nombre }}</span>
+                                        <span class="percentage">{{ area.porcentaje }}% ({{ area.pacientes }}/{{ area.capacidad }})</span>
                                     </div>
                                     <div class="progress-bar">
-                                        <div class="progress-fill fill-danger" style="width: 90%;"></div>
+                                        <div class="progress-fill {{ area.color }}" style="width: {{ area.porcentaje }}%;"></div>
                                     </div>
                                 </div>
-                                <div class="occupancy-item">
-                                    <div class="area-info">
-                                        <span>Piso 2: Ginecología</span>
-                                        <span class="percentage">45%</span>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill fill-success" style="width: 45%;"></div>
-                                    </div>
-                                </div>
-                                <div class="occupancy-item">
-                                    <div class="area-info">
-                                        <span>Terapia Intensiva (UCI)</span>
-                                        <span class="percentage">70%</span>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill fill-warning" style="width: 70%;"></div>
-                                    </div>
-                                </div>
+                                {% else %}
+                                <p style="padding: 1rem; color: #666;">No hay áreas configuradas.</p>
+                                {% endfor %}
                             </div>
                         </div>
 
                         <div class="card section-card">
                             <div class="card-header">
-                                <h3>Ingresos Recientes (Urgencias)</h3>
-                                <button class="btn-small">Ver Tablero Triage</button>
+                                <h3>Últimos Pacientes Registrados</h3>
                             </div>
                             <table class="simple-table">
                                 <thead>
                                     <tr>
-                                        <th>Hora</th>
+                                        <th>ID</th>
                                         <th>Paciente</th>
-                                        <th>Motivo</th>
-                                        <th>Triage</th>
+                                        <th>Área</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for p in ultimos_pacientes %}
                                     <tr>
-                                        <td>10:45</td>
-                                        <td>Mario Moreno</td>
-                                        <td>Dolor Torácico</td>
-                                        <td><span class="badge-triage triage-red">Rojo</span></td>
+                                        <td>#{{ p.id }}</td>
+                                        <td><strong>{{ p.nombre }} {{ p.apellidos }}</strong></td>
+                                        <td>
+                                            {% if p.area %}
+                                                {{ p.area.nombre }}
+                                            {% else %}
+                                                <span style="color:orange">En espera</span>
+                                            {% endif %}
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td>11:10</td>
-                                        <td>Florinda Meza</td>
-                                        <td>Fractura Tibia</td>
-                                        <td><span class="badge-triage triage-yellow">Amarillo</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>11:30</td>
-                                        <td>Carlos Villagrán</td>
-                                        <td>Cefalea Leve</td>
-                                        <td><span class="badge-triage triage-green">Verde</span></td>
-                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
 
                     <div class="column-right">
                         
                         <div class="card section-card">
                             <div class="card-header">
-                                <h3 class="text-danger">⚠ Stock Crítico</h3>
+                                <h3 class="text-danger">⚠ Stock Bajo (&lt;15)</h3>
                             </div>
                             <div class="stock-alerts-list">
+                                {% for med in alertas_list %}
                                 <div class="stock-item">
                                     <div class="stock-info">
-                                        <strong>Paracetamol 500mg</strong>
-                                        <small>Almacén Central</small>
+                                        <strong>{{ med.nombre }}</strong>
+                                        <small>Lote: {{ med.lote or 'N/A' }}</small>
                                     </div>
-                                    <div class="stock-badge badge-critical">15 u.</div>
+                                    <div class="stock-badge badge-critical">{{ med.stock }} u.</div>
                                 </div>
+                                {% else %}
                                 <div class="stock-item">
-                                    <div class="stock-info">
-                                        <strong>Gasas Estériles</strong>
-                                        <small>Isla Enfermería Piso 2</small>
-                                    </div>
-                                    <div class="stock-badge badge-warning">5 pq.</div>
+                                    <span style="color:green">✔ Inventario Saludable</span>
                                 </div>
-                                <div class="stock-item">
-                                    <div class="stock-info">
-                                        <strong>Insulina Glargina</strong>
-                                        <small>Farmacia</small>
-                                    </div>
-                                    <div class="stock-badge badge-critical">2 fco.</div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <a href="admin_inventario.html" class="btn-block">Gestionar Inventario</a>
+                                {% endfor %}
                             </div>
                         </div>
 
@@ -199,14 +160,11 @@
                                 <h3>Accesos Rápidos</h3>
                             </div>
                             <div class="quick-links">
-                                <button class="btn-quick-action" onclick="window.location.href='admin_pacientes.html'">
+                                <button class="btn-quick-action" onclick="window.location.href='{{ url_for('admin_pacientes') }}'">
                                     <span>➕</span> Nuevo Ingreso
                                 </button>
-                                <button class="btn-quick-action" onclick="window.location.href='admin_asignaciones.html'">
-                                    <span>📋</span> Asignar Turno
-                                </button>
-                                <button class="btn-quick-action" onclick="window.location.href='admin_capacitacion.html'">
-                                    <span>🎓</span> Cursos
+                                <button class="btn-quick-action" onclick="window.location.href='{{ url_for('admin_personal') }}'">
+                                    <span>👥</span> Gestionar Personal
                                 </button>
                             </div>
                         </div>
@@ -218,11 +176,5 @@
 
         </main>
     </div>
-    
-    <script>
-        // Script simple para poner la fecha actual
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('es-ES', options);
-    </script>
 </body>
 </html>

@@ -4,63 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario y Farmacia - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/inventory.css"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
+</head>
 <body>
 
     <div class="main-layout">
-        
         <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
+            <div class="brand"><h2>Nurstem</h2></div>
             <nav class="nav-menu">
-                <a href="admin_dashboard.html" class="nav-link">Dashboard</a>
-                <a href="admin_personal.html" class="nav-link">Personal</a>
-                <a href="admin_pacientes.html" class="nav-link">Pacientes</a>
-                <a href="admin_asignaciones.html" class="nav-link">Asignaciones</a>
-                <a href="admin_inventario.html" class="nav-link active">Inventario</a>
-                <a href="admin_capacitacion.html" class="nav-link">Capacitación</a>
-                <a href="#" class="nav-link">Cerrar Sesión</a>
+                <a href="{{ url_for('admin_personal') }}" class="nav-link">Personal</a>
+                <a href="{{ url_for('admin_pacientes') }}" class="nav-link">Pacientes</a>
+                <a href="{{ url_for('admin_asignaciones') }}" class="nav-link">Asignaciones</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('admin_capacitacion') }}" class="nav-link">Capacitación</a>
+                <a href="{{ url_for('admin_inventario') }}" class="nav-link active">Inventario</a>
             </nav>
         </aside>
 
         <main class="content-area">
-            
             <div class="module-container">
                 
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="padding:10px; margin-bottom:15px; border-radius:6px; background:#e0f2fe; color:#0369a1;">{{ message }}</div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
                 <div class="inventory-header">
                     <div class="header-info">
                         <h1>Gestión de Insumos y Farmacia</h1>
                         <p>Control de stock, lotes y caducidades</p>
                     </div>
                     <div class="filter-tabs">
-                        <button class="tab-btn active">Todos</button>
-                        <button class="tab-btn">Medicamentos</button>
-                        <button class="tab-btn">Material de Curación</button>
-                        <button class="tab-btn tab-alert">Stock Crítico (5)</button>
+                        <a href="{{ url_for('admin_inventario') }}" class="tab-btn {% if not filtro_actual %}active{% endif %}">Todos</a>
+                        <a href="{{ url_for('admin_inventario', tipo='Medicamento') }}" class="tab-btn {% if filtro_actual == 'Medicamento' %}active{% endif %}">Medicamentos</a>
+                        <a href="{{ url_for('admin_inventario', tipo='Material') }}" class="tab-btn {% if filtro_actual == 'Material' %}active{% endif %}">Material de Curación</a>
+                        <button class="tab-btn tab-alert">Stock Crítico ({{ alertas_count }})</button>
                     </div>
                 </div>
 
                 <div class="toolbar">
                     <div class="toolbar-actions" style="width: 100%; justify-content: space-between;">
-                        <div style="display: flex; gap: 1rem;">
-                            <input type="text" class="search-bar" placeholder="Buscar por nombre, sustancia o código...">
-                            <select class="form-select" style="width: 150px;">
-                                <option value="central">Almacén Central</option>
-                                <option value="piso1">Isla Piso 1</option>
-                                <option value="urgencias">Isla Urgencias</option>
-                            </select>
-                        </div>
-                        
-                        <button class="btn-primary" onclick="openProductModal()">
-                            <span>+</span> Nuevo Producto
-                        </button>
+                        <input type="text" class="search-bar" placeholder="Buscar por nombre o código...">
+                        <button class="btn-primary" onclick="openProductModal()"><span>+</span> Nuevo Producto</button>
                     </div>
                 </div>
 
@@ -78,124 +69,120 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            {% for prod in productos %}
+                            <tr class="{% if prod.stock <= prod.punto_reorden %}row-alert{% endif %}">
                                 <td>
-                                    <span class="code-text">MED-001</span>
-                                    <div class="batch-text">Lote: A4509</div>
+                                    <span class="code-text">{{ prod.codigo }}</span>
+                                    <div class="batch-text">Lote: {{ prod.lote or 'N/A' }}</div>
                                 </td>
                                 <td>
-                                    <div class="product-name">Paracetamol</div>
-                                    <div class="product-sub">Analgésico / Antipirético</div>
+                                    <div class="product-name {% if prod.stock <= prod.punto_reorden %}text-danger{% endif %}">{{ prod.nombre }}</div>
+                                    <div class="product-sub">{{ prod.tipo }}</div>
                                 </td>
-                                <td>Tabs 500mg (Caja 20)</td>
-                                <td>Dic 2026</td>
-                                <td>Farmacia Central</td>
+                                <td>{{ prod.presentacion }}</td>
+                                <td>
+                                    {% if prod.fecha_caducidad %}
+                                        {{ prod.fecha_caducidad }}
+                                    {% else %}
+                                        <span style="color:#94a3b8;">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if prod.ubicacion %}
+                                        {{ prod.ubicacion.nombre }}
+                                    {% else %}
+                                        General
+                                    {% endif %}
+                                </td>
                                 <td class="text-center">
-                                    <span class="stock-badge stock-healthy">120</span>
+                                    {% if prod.stock <= prod.punto_reorden %}
+                                        <span class="stock-badge stock-critical">{{ prod.stock }}</span>
+                                    {% elif prod.stock < (prod.punto_reorden * 2) %}
+                                        <span class="stock-badge stock-low">{{ prod.stock }}</span>
+                                    {% else %}
+                                        <span class="stock-badge stock-healthy">{{ prod.stock }}</span>
+                                    {% endif %}
                                 </td>
                                 <td>
-                                    <button class="btn-icon" title="Ajustar Stock" onclick="openStockModal('Paracetamol 500mg', 120)">⇄</button>
-                                    <button class="btn-icon" title="Editar">✎</button>
+                                    <button class="btn-icon" title="Ajustar Stock" 
+                                        onclick="openStockModal('{{ prod.id }}', '{{ prod.nombre }}', {{ prod.stock }})">
+                                        ⇄
+                                    </button>
                                 </td>
                             </tr>
-
-                            <tr>
-                                <td>
-                                    <span class="code-text">MAT-089</span>
-                                    <div class="batch-text">Lote: N/A</div>
-                                </td>
-                                <td>
-                                    <div class="product-name">Gasas Estériles</div>
-                                    <div class="product-sub">Material de Curación</div>
-                                </td>
-                                <td>Paquete 10x10</td>
-                                <td>Ago 2027</td>
-                                <td>Isla Urgencias</td>
-                                <td class="text-center">
-                                    <span class="stock-badge stock-low">15</span>
-                                </td>
-                                <td>
-                                    <button class="btn-icon" title="Ajustar Stock" onclick="openStockModal('Gasas Estériles', 15)">⇄</button>
-                                    <button class="btn-icon" title="Editar">✎</button>
-                                </td>
-                            </tr>
-
-                            <tr class="row-alert">
-                                <td>
-                                    <span class="code-text">MED-202</span>
-                                    <div class="batch-text">Lote: B9901</div>
-                                </td>
-                                <td>
-                                    <div class="product-name text-danger">Insulina Glargina</div>
-                                    <div class="product-sub">Refrigerado</div>
-                                </td>
-                                <td>Frasco 10ml</td>
-                                <td><span class="expiry-alert">FEB 2026</span></td>
-                                <td>Farmacia Central</td>
-                                <td class="text-center">
-                                    <span class="stock-badge stock-critical">2</span>
-                                </td>
-                                <td>
-                                    <button class="btn-icon" title="Ajustar Stock" onclick="openStockModal('Insulina Glargina', 2)">⇄</button>
-                                    <button class="btn-icon" title="Editar">✎</button>
-                                </td>
-                            </tr>
+                            {% else %}
+                            <tr><td colspan="7" style="text-align:center; padding:2rem;">No hay productos registrados.</td></tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </main>
     </div>
 
     <div id="modalProduct" class="modal">
         <div class="modal-content modal-lg">
             <h2 class="modal-title">Registrar Nuevo Producto</h2>
-            <form>
+            <form action="{{ url_for('guardar_producto') }}" method="POST">
                 <div class="form-row">
                     <div class="form-group col-half">
-                        <label>Nombre Comercial</label>
-                        <input type="text" class="form-input" placeholder="Ej. Aspirina Protect">
+                        <label>Código Interno</label>
+                        <input type="text" name="codigo" class="form-input" placeholder="Ej. MED-001" required>
                     </div>
                     <div class="form-group col-half">
-                        <label>Sustancia Activa / Genérico</label>
-                        <input type="text" class="form-input" placeholder="Ej. Ácido Acetilsalicílico">
+                        <label>Nombre Comercial</label>
+                        <input type="text" name="nombre" class="form-input" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-third">
                         <label>Tipo</label>
-                        <select class="form-select">
-                            <option>Medicamento</option>
-                            <option>Material Curación</option>
-                            <option>Equipo Médico</option>
+                        <select name="tipo" class="form-select">
+                            <option value="Medicamento">Medicamento</option>
+                            <option value="Material">Material Curación</option>
+                            <option value="Solucion">Soluciones / Sueros</option>
                         </select>
                     </div>
                     <div class="form-group col-third">
                         <label>Presentación</label>
-                        <input type="text" class="form-input" placeholder="Ej. Caja 30 tabs">
+                        <input type="text" name="presentacion" class="form-input" placeholder="Ej. Caja 20 tabs">
                     </div>
                     <div class="form-group col-third">
-                        <label>Concentración</label>
-                        <input type="text" class="form-input" placeholder="Ej. 100mg">
+                        <label>Ubicación</label>
+                        <select name="inventario_id" class="form-select">
+                            {% for alm in almacenes %}
+                                <option value="{{ alm.id }}">{{ alm.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-half">
+                        <label>Lote</label>
+                        <input type="text" name="lote" class="form-input">
+                    </div>
+                    <div class="form-group col-half">
+                        <label>Caducidad</label>
+                        <input type="date" name="fecha_caducidad" class="form-input">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-half">
                         <label>Stock Inicial</label>
-                        <input type="number" class="form-input" placeholder="0">
+                        <input type="number" name="stock" class="form-input" value="0">
                     </div>
                     <div class="form-group col-half">
-                        <label>Punto de Reorden (Alerta)</label>
-                        <input type="number" class="form-input" placeholder="Ej. 20">
+                        <label>Punto Reorden (Alerta)</label>
+                        <input type="number" name="punto_reorden" class="form-input" value="10">
                     </div>
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal('modalProduct')">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar en Catálogo</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
                 </div>
             </form>
         </div>
@@ -204,60 +191,58 @@
     <div id="modalStock" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <h2 class="modal-title">Movimiento de Stock</h2>
-            <div class="stock-adjustment-container">
-                <p id="productNameTitle" style="color: var(--color-secondary); font-weight: 600; margin-bottom: 1rem;">Producto X</p>
+            <form action="{{ url_for('movimiento_stock') }}" method="POST">
+                <input type="hidden" id="stock_prod_id" name="producto_id">
+                <input type="hidden" id="stock_tipo_mov" name="tipo_movimiento" value="entrada"> <div class="stock-adjustment-container">
+                    <p id="productNameTitle" style="color:#64748b; font-weight:600; margin-bottom:1rem; text-align:center;">Producto X</p>
+                    
+                    <div class="current-stock-display">
+                        <span>Stock Actual:</span>
+                        <strong id="currentStockDisplay">0</strong>
+                    </div>
+
+                    <div class="adjustment-controls">
+                        <button type="button" class="btn-adjust type-minus" onclick="setMovementMode('salida')">- Salida</button>
+                        <input type="number" name="cantidad" class="input-adjust" value="1" min="1" required>
+                        <button type="button" class="btn-adjust type-plus" onclick="setMovementMode('entrada')">+ Entrada</button>
+                    </div>
+                    
+                    <p id="movLabel" style="text-align:center; margin-top:10px; font-size:0.9rem; font-weight:bold; color:#16a34a;">Modo: Entrada</p>
+                </div>
                 
-                <div class="current-stock-display">
-                    <span>Stock Actual:</span>
-                    <strong id="currentStockDisplay">0</strong>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modalStock')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Confirmar</button>
                 </div>
-
-                <div class="adjustment-controls">
-                    <button class="btn-adjust type-minus" onclick="setMovement('salida')">- Salida</button>
-                    <input type="number" class="input-adjust" value="1" min="1">
-                    <button class="btn-adjust type-plus" onclick="setMovement('entrada')">+ Entrada</button>
-                </div>
-
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label>Motivo</label>
-                    <select class="form-select">
-                        <option>Reabastecimiento (Compra)</option>
-                        <option>Salida a Piso / Consumo</option>
-                        <option>Caducidad / Merma</option>
-                        <option>Ajuste de Inventario</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeModal('modalStock')">Cancelar</button>
-                <button type="button" class="btn-primary">Confirmar Movimiento</button>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Lógica simple para manejo de múltiples modales
-        function openProductModal() {
-            document.getElementById('modalProduct').style.display = 'flex';
-        }
-
-        function openStockModal(name, stock) {
+        function openProductModal() { document.getElementById('modalProduct').style.display = 'flex'; }
+        
+        function openStockModal(id, name, stock) {
+            document.getElementById('stock_prod_id').value = id;
             document.getElementById('productNameTitle').innerText = name;
             document.getElementById('currentStockDisplay').innerText = stock;
+            setMovementMode('entrada'); // Reset default
             document.getElementById('modalStock').style.display = 'flex';
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Cerrar al click fuera
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+        function setMovementMode(mode) {
+            document.getElementById('stock_tipo_mov').value = mode;
+            const label = document.getElementById('movLabel');
+            if(mode === 'entrada') {
+                label.innerText = "Modo: Entrada (Compras)";
+                label.style.color = "#16a34a";
+            } else {
+                label.innerText = "Modo: Salida (Consumo/Merma)";
+                label.style.color = "#dc2626";
             }
         }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(e) { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; }
     </script>
 </body>
 </html>

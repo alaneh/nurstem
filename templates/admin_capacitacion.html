@@ -4,29 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capacitación y Desarrollo - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/training.css"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/training.css') }}">
+</head>
 <body>
 
     <div class="main-layout">
         
         <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
+            <div class="brand"><h2>Nurstem</h2></div>
             <nav class="nav-menu">
-                <a href="admin_dashboard.html" class="nav-link">Dashboard</a>
-                <a href="admin_personal.html" class="nav-link">Personal</a>
-                <a href="admin_pacientes.html" class="nav-link">Pacientes</a>
-                <a href="admin_asignaciones.html" class="nav-link">Asignaciones</a>
-                <a href="admin_inventario.html" class="nav-link">Inventario</a>
-                <a href="admin_capacitacion.html" class="nav-link active">Capacitación</a>
-                <a href="#" class="nav-link">Cerrar Sesión</a>
+                <a href="{{ url_for('admin_personal') }}" class="nav-link">Personal</a>
+                <a href="{{ url_for('admin_pacientes') }}" class="nav-link">Pacientes</a>
+                <a href="{{ url_for('admin_asignaciones') }}" class="nav-link">Asignaciones</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('admin_capacitacion') }}" class="nav-link active">Capacitación</a>
+                <a href="{{ url_for('admin_inventario') }}" class="nav-link">Inventario</a>
             </nav>
         </aside>
 
@@ -34,118 +29,87 @@
             
             <div class="module-container">
                 
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="padding:10px; margin-bottom:15px; background:#e0f2fe; color:#0369a1; border-radius:6px;">{{ message }}</div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
                 <div class="training-header">
                     <div class="header-content">
                         <h1>Capacitación y Sensibilización</h1>
-                        <p>Gestión de cursos, evaluaciones anuales y campañas de salud</p>
+                        <p>Gestión de cursos y desarrollo profesional</p>
                     </div>
                     <div class="header-stats">
                         <div class="stat-pill">
                             <span class="stat-label">Cursos Activos</span>
-                            <span class="stat-number">4</span>
+                            <span class="stat-number">{{ total_cursos }}</span>
                         </div>
                         <div class="stat-pill">
-                            <span class="stat-label">Becas Asignadas</span>
-                            <span class="stat-number">12</span>
+                            <span class="stat-label">Inscripciones</span>
+                            <span class="stat-number">{{ total_becas }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="nav-tabs">
                     <button class="nav-tab active" onclick="switchTab('cursos')">Catálogo de Cursos</button>
-                    <button class="nav-tab" onclick="switchTab('evaluaciones')">Evaluaciones y Desempeño</button>
-                    <button class="nav-tab" onclick="switchTab('campanas')">Campañas de Sensibilización</button>
+                    <button class="nav-tab" onclick="switchTab('evaluaciones')">Evaluaciones</button>
                 </div>
 
                 <div id="tab-cursos" class="tab-content active-content">
                     <div class="toolbar">
-                        <div class="toolbar-info">
-                            <h3>Oferta Educativa Vigente</h3>
-                        </div>
+                        <div class="toolbar-info"><h3>Oferta Educativa Vigente</h3></div>
                         <div class="toolbar-actions">
-                            <button class="btn-primary" onclick="openCourseModal()">
-                                <span>+</span> Crear Nuevo Curso
-                            </button>
+                            <button class="btn-primary" onclick="openCourseModal()"><span>+</span> Crear Nuevo Curso</button>
                         </div>
                     </div>
 
                     <div class="course-grid">
+                        {% for curso in cursos %}
                         <div class="course-card">
-                            <div class="course-badge type-technical">Clínico</div>
+                            {% set badge_class = 'type-technical' %}
+                            {% if curso.tipo == 'Humanización' %}{% set badge_class = 'type-human' %}
+                            {% elif curso.tipo == 'Normativa' %}{% set badge_class = 'type-safety' %}
+                            {% endif %}
+                            
+                            <div class="course-badge {{ badge_class }}">{{ curso.tipo }}</div>
+                            
                             <div class="course-body">
-                                <h4>Actualización de Medicamentos</h4>
-                                <p class="course-desc">Protocolos para nuevos fármacos en terapia intensiva.</p>
+                                <h4>{{ curso.nombre }}</h4>
+                                <p class="course-desc">{{ curso.descripcion }}</p>
                                 <div class="course-meta">
-                                    <span>📅 10 Ene - 15 Ene</span>
-                                    <span>👥 20 Cupos</span>
+                                    <span>📅 {{ curso.fecha_inicio }}</span>
+                                    <span>👥 {{ curso.cupo_max }} Cupos</span>
                                 </div>
+                                
+                                {% set inscritos = curso.inscripciones|length %}
+                                {% set porcentaje = (inscritos / curso.cupo_max * 100) | int %}
+                                
                                 <div class="progress-container">
                                     <div class="progress-bar-bg">
-                                        <div class="progress-bar-fill" style="width: 80%;"></div>
+                                        <div class="progress-bar-fill" style="width: {{ porcentaje }}%;"></div>
                                     </div>
-                                    <span class="progress-text">16 inscritos</span>
+                                    <span class="progress-text">{{ inscritos }} inscritos</span>
                                 </div>
                             </div>
                             <div class="course-footer">
-                                <button class="btn-outline">Gestionar Lista</button>
+                                <button class="btn-outline">Ver Lista</button>
                             </div>
                         </div>
-
-                        <div class="course-card">
-                            <div class="course-badge type-human">Humanización</div>
-                            <div class="course-body">
-                                <h4>Educación en Compasión</h4>
-                                <p class="course-desc">Taller práctico sobre empatía y psicología del dolor.</p>
-                                <div class="course-meta">
-                                    <span>📅 20 Feb - 22 Feb</span>
-                                    <span>👥 50 Cupos</span>
-                                </div>
-                                <div class="progress-container">
-                                    <div class="progress-bar-bg">
-                                        <div class="progress-bar-fill" style="width: 40%;"></div>
-                                    </div>
-                                    <span class="progress-text">20 inscritos</span>
-                                </div>
-                            </div>
-                            <div class="course-footer">
-                                <button class="btn-outline">Gestionar Lista</button>
-                            </div>
-                        </div>
-                        
-                         <div class="course-card">
-                            <div class="course-badge type-safety">Normativa</div>
-                            <div class="course-body">
-                                <h4>Manejo de Residuos (RPBI)</h4>
-                                <p class="course-desc">Certificación obligatoria anual para todo el personal.</p>
-                                <div class="course-meta">
-                                    <span>📅 Permanente</span>
-                                    <span>👥 Ilimitado</span>
-                                </div>
-                                <div class="progress-container">
-                                    <div class="progress-bar-bg">
-                                        <div class="progress-bar-fill" style="width: 95%;"></div>
-                                    </div>
-                                    <span class="progress-text">95% Cumplimiento</span>
-                                </div>
-                            </div>
-                            <div class="course-footer">
-                                <button class="btn-outline">Ver Reporte</button>
-                            </div>
-                        </div>
+                        {% else %}
+                            <p>No hay cursos registrados.</p>
+                        {% endfor %}
                     </div>
                 </div>
 
                 <div id="tab-evaluaciones" class="tab-content">
                     <div class="toolbar">
                         <div class="toolbar-info">
-                            <h3>Historial de Evaluaciones Anuales</h3>
-                            <p>Registro de desempeño y capacitación continua</p>
-                        </div>
-                        <div class="toolbar-actions">
-                            <input type="text" class="search-bar" placeholder="Buscar empleado...">
-                            <button class="btn-primary" onclick="openEvalModal()">
-                                <span>+</span> Registrar Evaluación
-                            </button>
+                            <h3>Historial de Evaluaciones</h3>
+                            <p>Progreso académico del personal</p>
                         </div>
                     </div>
 
@@ -154,120 +118,76 @@
                             <thead>
                                 <tr>
                                     <th>Empleado</th>
-                                    <th>Periodo</th>
-                                    <th>Cursos Completados</th>
-                                    <th>Calificación Desempeño</th>
+                                    <th>Curso</th>
+                                    <th>Progreso</th>
+                                    <th>Calificación</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for evaluacion in evaluaciones %}
                                 <tr>
                                     <td>
-                                        <div class="user-name">Lula Enfermera</div>
-                                        <div class="user-email">Jefe Pediatría</div>
+                                        <div class="user-name">{{ evaluacion.enfermero.nombre }} {{ evaluacion.enfermero.apellidos }}</div>
                                     </td>
-                                    <td>2025</td>
-                                    <td>4 / 4</td>
+                                    <td>{{ evaluacion.curso.nombre }}</td>
+                                    <td>{{ evaluacion.progreso }}%</td>
                                     <td>
-                                        <span class="score-badge score-high">98/100</span>
+                                        {% if evaluacion.calificacion >= 90 %}
+                                            <span class="score-badge score-high">{{ evaluacion.calificacion }}/100</span>
+                                        {% elif evaluacion.calificacion >= 70 %}
+                                            <span class="score-badge score-mid">{{ evaluacion.calificacion }}/100</span>
+                                        {% else %}
+                                            <span class="score-badge score-low">{{ evaluacion.calificacion }}/100</span>
+                                        {% endif %}
                                     </td>
-                                    <td><span class="status-badge status-active">Completado</span></td>
-                                    <td><button class="btn-icon">📄</button></td>
+                                    <td><span class="status-badge status-active">{{ evaluacion.estado }}</span></td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div class="user-name">Juan Pérez</div>
-                                        <div class="user-email">Enfermero General</div>
-                                    </td>
-                                    <td>2025</td>
-                                    <td>2 / 4</td>
-                                    <td>
-                                        <span class="score-badge score-mid">85/100</span>
-                                    </td>
-                                    <td><span class="status-badge status-warning">Pendiente Curso</span></td>
-                                    <td><button class="btn-icon">📄</button></td>
-                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" style="text-align:center; padding:1rem;">No hay evaluaciones registradas aún.</td></tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                 <div id="tab-campanas" class="tab-content">
-                    <div class="toolbar">
-                         <div class="toolbar-info">
-                            <h3>Campañas de Salud Pública</h3>
-                            <p>Sensibilización para pacientes y familiares</p>
-                        </div>
-                        <div class="toolbar-actions">
-                             <button class="btn-primary">Nueva Campaña</button>
-                        </div>
-                    </div>
-                    
-                    <div class="campaign-list">
-                        <div class="campaign-item">
-                            <div class="campaign-date">
-                                <span class="month">NOV</span>
-                                <span class="day">14</span>
-                            </div>
-                            <div class="campaign-info">
-                                <h4>Día Mundial de la Diabetes</h4>
-                                <p>Charlas informativas en sala de espera y módulos de detección de glucosa.</p>
-                            </div>
-                            <span class="status-badge status-inactive">Finalizada</span>
-                        </div>
-
-                        <div class="campaign-item">
-                            <div class="campaign-date active-date">
-                                <span class="month">ENE</span>
-                                <span class="day">20</span>
-                            </div>
-                            <div class="campaign-info">
-                                <h4>Prevención de Enfermedades Virales</h4>
-                                <p>Campaña de vacunación y uso correcto de cubrebocas en áreas comunes.</p>
-                            </div>
-                            <span class="status-badge status-active">En Curso</span>
-                        </div>
-                    </div>
-                 </div>
-
             </div>
-
         </main>
     </div>
 
     <div id="modalCourse" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">Programar Capacitación</h2>
-            <form>
+            <form action="{{ url_for('guardar_curso') }}" method="POST">
+                
                 <div class="form-group">
-                    <label>Nombre del Curso / Taller</label>
-                    <input type="text" class="form-input" placeholder="Ej. Actualización COVID-19">
+                    <label>Nombre del Curso</label>
+                    <input type="text" name="nombre" class="form-input" required placeholder="Ej. Actualización COVID-19">
                 </div>
                 
                 <div class="form-group">
                     <label>Tipo de Formación</label>
-                    <select class="form-select">
-                        <option>Técnico / Clínico</option>
-                        <option>Humanización / Soft Skills</option>
-                        <option>Normativo / Obligatorio</option>
+                    <select name="tipo" class="form-select">
+                        <option value="Clínico">Técnico / Clínico</option>
+                        <option value="Humanización">Humanización / Soft Skills</option>
+                        <option value="Normativa">Normativo / Obligatorio</option>
                     </select>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-half">
                         <label>Fecha Inicio</label>
-                        <input type="date" class="form-input">
+                        <input type="date" name="fecha_inicio" class="form-input" required>
                     </div>
                     <div class="form-group col-half">
                         <label>Cupo Máximo</label>
-                        <input type="number" class="form-input" placeholder="30">
+                        <input type="number" name="cupo" class="form-input" value="20">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Descripción Breve</label>
-                    <textarea class="form-input" rows="3"></textarea>
+                    <textarea name="descripcion" class="form-input" rows="3"></textarea>
                 </div>
 
                 <div class="modal-actions">
@@ -279,26 +199,15 @@
     </div>
 
     <script>
-        // Lógica de Tabs
         function switchTab(tabId) {
-            // Quitar clase active de todos los botones
             document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-            // Ocultar todos los contenidos
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-content'));
-            
-            // Activar el seleccionado
             event.target.classList.add('active');
             document.getElementById('tab-' + tabId).classList.add('active-content');
         }
-
-        // Modales
         function openCourseModal() { document.getElementById('modalCourse').style.display = 'flex'; }
-        function openEvalModal() { alert('Funcionalidad de evaluación en desarrollo'); } // Placeholder
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        window.onclick = function(e) { 
-            if(e.target.classList.contains('modal')) e.target.style.display = 'none'; 
-        }
+        window.onclick = function(e) { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; }
     </script>
 </body>
 </html>

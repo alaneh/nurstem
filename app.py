@@ -1,50 +1,215 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "clave_secreta_nurstem"
 
 # --- CONFIGURACIÓN DE BASE DE DATOS (PostgreSQL) ---
-# Asegúrate de que tu contraseña sea 'admin123'. Si es otra, cámbiala aquí.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin123@localhost/nurstem'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- MODELOS (Mapeo exacto con nurstem.sql) ---
-
+# --- MODELOS ---
 class RolEnfermeria(db.Model):
-    # Definimos el nombre exacto de la tabla en SQL
-    __tablename__ = 'rolenfermeria' # Ojo: Postgres suele normalizar a minúsculas si no usaste comillas en el CREATE
-    
+    __tablename__ = 'rolenfermeria'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    
-    # CORRECCIÓN: En tu SQL la columna se llama 'nivelAutoridad' (camelCase)
-    # El primer argumento string le dice a SQLAlchemy cómo buscarla en la BD real.
-    nivel_autoridad = db.Column('nivelautoridad', db.String(50)) 
-    
-    # Relación (Esto no crea columna, es para Python)
+    nivel_autoridad = db.Column('nivelautoridad', db.String(50))
     enfermeros = db.relationship('Enfermero', backref='rol', lazy=True)
 
 class Enfermero(db.Model):
     __tablename__ = 'enfermero'
-    
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     apellidos = db.Column(db.String(150), nullable=False)
     telefono = db.Column(db.String(20))
     direccion = db.Column(db.String(255))
     activo = db.Column(db.Boolean, default=True)
-    
-    # Coincide con tu SQL: rol_enfermeria_id
     rol_enfermeria_id = db.Column(db.Integer, db.ForeignKey('rolenfermeria.id'))
+
+class Area(db.Model):
+    __tablename__ = 'area'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    capacidad = db.Column(db.Integer, default=10) # Default para evitar division por cero
+    pacientes = db.relationship('Paciente', backref='area', lazy=True)
+
+class Medico(db.Model):
+    __tablename__ = 'medico'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    apellidos = db.Column(db.String(150), nullable=False)
+    especialidad = db.Column(db.String(100))
+    pacientes = db.relationship('Paciente', backref='medico', lazy=True)
+
+class Paciente(db.Model):
+    __tablename__ = 'paciente'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    apellidos = db.Column(db.String(150), nullable=False)
+    fecha_nacimiento = db.Column('fechanacimiento', db.Date)
+    genero = db.Column(db.String(50))
+    telefono = db.Column(db.String(20))
+    direccion = db.Column(db.String(255))
+    medico_id = db.Column(db.Integer, db.ForeignKey('medico.id'), nullable=True)
+    area_id = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=True)
+
+# Nuevos Modelos para Inventario (Simplificados para el Dashboard)
+class InventarioFarmacia(db.Model):
+    __tablename__ = 'inventariofarmacia'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    
+    # Mapeo exacto a las columnas de tu BD (que están en minúsculas en Postgres)
+    fecha_actualizacion = db.Column('fechaactualizacion', db.DateTime, default=datetime.utcnow)
+    capacidad_almacenamiento = db.Column('capacidadalmacenamiento', db.Integer)
+    
+    # Relación con Área (puede ser null si es el Almacén Central)
+    area_id = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=True)
+    
+    # Relaciones ORM
+    medicamentos = db.relationship('Medicamento', backref='ubicacion', lazy=True)
+    area = db.relationship('Area', backref='inventario')
+class Medicamento(db.Model):
+    __tablename__ = 'medicamento'
+    id = db.Column(db.Integer, primary_key=True)
+    codigo = db.Column(db.String(50), unique=True) # Ej: MED-001
+    nombre = db.Column(db.String(150), nullable=False)
+    tipo = db.Column(db.String(50)) # 'Medicamento', 'Material', 'Solucion'
+    presentacion = db.Column(db.String(100)) # Ej: Caja 20 tabs
+    stock = db.Column(db.Integer, default=0)
+    lote = db.Column(db.String(100))
+    fecha_caducidad = db.Column(db.Date)
+    punto_reorden = db.Column(db.Integer, default=10) # Nivel para alerta
+    
+    inventario_id = db.Column(db.Integer, db.ForeignKey('inventariofarmacia.id'))
+
+#Asignaciones (modulo 4)
+class Turno(db.Model):
+    __tablename__ = 'turno'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    
+    # --- CORRECCIÓN BASADA EN TU BASE DE DATOS ---
+    # Eliminamos 'horario' y agregamos las columnas reales que tienes en la imagen
+    fecha = db.Column(db.Date)
+    tipoturno = db.Column(db.String(50)) 
+
+    # NOTA: Como tu tabla tiene 'tipoturno' y 'fecha', 
+    # es probable que tu base de datos considere un 'Turno' como algo específico de un día.
+
+class Asignacion(db.Model):
+    __tablename__ = 'asignacion'
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.Date, nullable=False)
+    
+    # Relaciones
+    enfermero_id = db.Column(db.Integer, db.ForeignKey('enfermero.id'), nullable=False)
+    area_id = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=False)
+    turno_id = db.Column(db.Integer, db.ForeignKey('turno.id'), nullable=False)
+    
+    # Objetos para acceder a los datos (Jinja2)
+    enfermero = db.relationship('Enfermero', backref='asignaciones')
+    area = db.relationship('Area', backref='asignaciones')
+    turno = db.relationship('Turno')
+    
+class Curso(db.Model):
+    __tablename__ = 'curso'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(150), nullable=False)
+    descripcion = db.Column(db.Text)
+    tipo = db.Column(db.String(50)) # 'Clínico', 'Humanización', 'Normativa'
+    fecha_inicio = db.Column(db.Date)
+    fecha_fin = db.Column(db.Date)
+    cupo_max = db.Column(db.Integer, default=20)
+    
+    # Relación con inscripciones
+    inscripciones = db.relationship('Inscripcion', backref='curso', lazy=True)
+
+class Inscripcion(db.Model):
+    __tablename__ = 'inscripcion'
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_inscripcion = db.Column(db.Date, default=datetime.utcnow)
+    calificacion = db.Column(db.Float, default=0.0)
+    progreso = db.Column(db.Integer, default=0) # 0 a 100%
+    estado = db.Column(db.String(20), default='Inscrito') # Inscrito, Completado, Aprobado
+    
+    enfermero_id = db.Column(db.Integer, db.ForeignKey('enfermero.id'), nullable=False)
+    curso_id = db.Column(db.Integer, db.ForeignKey('curso.id'), nullable=False)
+    
+    # Relaciones para acceder a los datos
+    enfermero = db.relationship('Enfermero', backref='cursos_inscritos')
+    
+
+
+
+
+
 
 # --- RUTAS ---
 
 @app.route('/')
 def index():
-    return redirect(url_for('admin_personal'))
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    try:
+        # 1. KPIs Generales
+        total_pacientes = Paciente.query.count()
+        total_enfermeros = Enfermero.query.filter_by(activo=True).count()
+        
+        # Urgencias: Contamos pacientes en área que contenga "Urgencia" en el nombre
+        urgencias_count = Paciente.query.join(Area).filter(Area.nombre.ilike('%Urgencia%')).count()
+
+        # Alertas de Stock (Medicamentos con menos de 10 unidades)
+        alertas_stock = Medicamento.query.filter(Medicamento.stock < 15).all()
+        count_alertas = len(alertas_stock)
+
+        # 2. Datos de Ocupación por Área
+        areas = Area.query.all()
+        ocupacion_data = []
+        
+        for area in areas:
+            # Cuántos pacientes hay en esta área
+            pacientes_en_area = Paciente.query.filter_by(area_id=area.id).count()
+            # Porcentaje
+            porcentaje = 0
+            if area.capacidad and area.capacidad > 0:
+                porcentaje = int((pacientes_en_area / area.capacidad) * 100)
+            
+            # Color de la barra según saturación
+            color_class = "fill-success" # Verde
+            if porcentaje > 50: color_class = "fill-warning" # Amarillo
+            if porcentaje > 80: color_class = "fill-danger"  # Rojo
+
+            ocupacion_data.append({
+                "nombre": area.nombre,
+                "pacientes": pacientes_en_area,
+                "capacidad": area.capacidad,
+                "porcentaje": porcentaje,
+                "color": color_class
+            })
+
+        # 3. Últimos Ingresos (Limitado a 5)
+        ultimos_pacientes = Paciente.query.order_by(Paciente.id.desc()).limit(5).all()
+
+        return render_template('admin_dashboard.html',
+                               total_pacientes=total_pacientes,
+                               total_enfermeros=total_enfermeros,
+                               urgencias_count=urgencias_count,
+                               count_alertas=count_alertas,
+                               alertas_list=alertas_stock, # Pasamos la lista para mostrar detalle
+                               ocupacion_data=ocupacion_data,
+                               ultimos_pacientes=ultimos_pacientes,
+                               fecha_actual=datetime.now().strftime("%d %B %Y"))
+
+    except Exception as e:
+        return f"<h3>Error en Dashboard:</h3> <p>{e}</p>"
+
+#Rutas de personal
 
 @app.route('/admin_personal')
 def admin_personal():
@@ -123,8 +288,335 @@ def actualizar_enfermero():
             
         return redirect(url_for('admin_personal'))
 
+@app.route('/admin_pacientes')
+def admin_pacientes():
+    pacientes = Paciente.query.all()
+    areas = Area.query.all()
+    medicos = Medico.query.all()
+    return render_template('admin_pacientes.html', pacientes=pacientes, areas=areas, medicos=medicos)
+
+@app.route('/guardar_paciente', methods=['POST'])
+def guardar_paciente():
+    if request.method == 'POST':
+        try:
+            # Convertir fecha de string (HTML) a objeto date (Python)
+            fecha_str = request.form['fechaNacimiento']
+            fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else None
+            
+            # Manejo de IDs vacíos (si no se selecciona área o médico)
+            area_id = request.form['area_id'] if request.form['area_id'] else None
+            medico_id = request.form['medico_id'] if request.form['medico_id'] else None
+
+            nuevo_paciente = Paciente(
+                nombre=request.form['nombre'],
+                apellidos=request.form['apellidos'],
+                fecha_nacimiento=fecha_obj,
+                genero=request.form['genero'],
+                telefono=request.form['telefono'],
+                direccion=request.form['direccion'],
+                area_id=area_id,
+                medico_id=medico_id
+            )
+            
+            db.session.add(nuevo_paciente)
+            db.session.commit()
+            flash('Paciente registrado correctamente')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar paciente: {str(e)}')
+            
+        return redirect(url_for('admin_pacientes'))
+
+@app.route('/actualizar_paciente', methods=['POST'])
+def actualizar_paciente():
+    if request.method == 'POST':
+        try:
+            paciente_id = request.form['id']
+            paciente = Paciente.query.get_or_404(paciente_id)
+            
+            # Actualizar campos básicos
+            paciente.nombre = request.form['nombre']
+            paciente.apellidos = request.form['apellidos']
+            paciente.genero = request.form['genero']
+            paciente.telefono = request.form['telefono']
+            paciente.direccion = request.form['direccion']
+            
+            # Actualizar Fecha
+            fecha_str = request.form['fechaNacimiento']
+            if fecha_str:
+                paciente.fecha_nacimiento = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            
+            # Actualizar Relaciones
+            paciente.area_id = request.form['area_id'] if request.form['area_id'] else None
+            paciente.medico_id = request.form['medico_id'] if request.form['medico_id'] else None
+            
+            db.session.commit()
+            flash('Datos del paciente actualizados')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}')
+            
+        return redirect(url_for('admin_pacientes'))
+
+@app.route('/eliminar_paciente/<int:id>')
+def eliminar_paciente(id):
+    try:
+        paciente = Paciente.query.get_or_404(id)
+        # Aquí usamos borrado físico porque la tabla SQL no tiene columna 'activo'
+        db.session.delete(paciente) 
+        db.session.commit()
+        flash('Paciente eliminado del sistema.')
+    except Exception as e:
+        flash(f'Error al eliminar: {str(e)}')
+    return redirect(url_for('admin_pacientes'))
+
+#ASIGNACIONES
+@app.route('/admin_asignaciones')
+def admin_asignaciones():
+    # 1. Obtener filtros de la URL (si existen), sino usar defaults
+    fecha_str = request.args.get('fecha')
+    turno_id = request.args.get('turno_id')
+    
+    if fecha_str:
+        fecha_filtro = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+    else:
+        fecha_filtro = datetime.now().date()
+        
+    # 2. Consultar catálogos para los dropdowns
+    areas = Area.query.all()
+    turnos = Turno.query.all()
+    
+    # Personal disponible (Activos)
+    enfermeros = Enfermero.query.filter_by(activo=True).all()
+    
+    # 3. Consultar Asignaciones Existentes para esa fecha (y turno si se seleccionó)
+    query = Asignacion.query.filter_by(fecha=fecha_filtro)
+    if turno_id:
+        query = query.filter_by(turno_id=turno_id)
+    asignaciones = query.all()
+
+    # 4. Estructurar datos para el Tablero Kanban (Organizar por Área)
+    # Diccionario: { area_id: [lista_de_asignaciones] }
+    tablero = {area.id: [] for area in areas}
+    for asig in asignaciones:
+        if asig.area_id in tablero:
+            tablero[asig.area_id].append(asig)
+
+    return render_template('admin_asignaciones.html', 
+                           areas=areas, 
+                           turnos=turnos, 
+                           enfermeros=enfermeros,
+                           tablero=tablero,
+                           fecha_actual=fecha_filtro,
+                           turno_seleccionado=int(turno_id) if turno_id else None)
+
+@app.route('/guardar_asignacion', methods=['POST'])
+def guardar_asignacion():
+    if request.method == 'POST':
+        try:
+            fecha_obj = datetime.strptime(request.form['fecha'], '%Y-%m-%d').date()
+            
+            # Validar que el enfermero no esté ya asignado ese día en ese turno
+            existe = Asignacion.query.filter_by(
+                fecha=fecha_obj,
+                turno_id=request.form['turno_id'],
+                enfermero_id=request.form['enfermero_id']
+            ).first()
+            
+            if existe:
+                flash('¡Error! Este enfermero ya tiene asignación en ese turno.', 'error')
+            else:
+                nueva_asig = Asignacion(
+                    fecha=fecha_obj,
+                    area_id=request.form['area_id'],
+                    enfermero_id=request.form['enfermero_id'],
+                    turno_id=request.form['turno_id']
+                )
+                db.session.add(nueva_asig)
+                db.session.commit()
+                flash('Asignación creada correctamente', 'success')
+                
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al asignar: {str(e)}', 'error')
+            
+        # Mantener la fecha seleccionada en la redirección
+        return redirect(url_for('admin_asignaciones', fecha=request.form['fecha'], turno_id=request.form['turno_id']))
+
+@app.route('/eliminar_asignacion/<int:id>')
+def eliminar_asignacion(id):
+    try:
+        asig = Asignacion.query.get_or_404(id)
+        fecha_redir = asig.fecha
+        db.session.delete(asig)
+        db.session.commit()
+        flash('Asignación eliminada (Enfermero liberado)', 'warning')
+        return redirect(url_for('admin_asignaciones', fecha=fecha_redir))
+    except Exception as e:
+        flash(f'Error al eliminar: {e}', 'error')
+        return redirect(url_for('admin_asignaciones'))
+
+#RUTAS DE INVENTARIO
+
+@app.route('/admin_inventario')
+def admin_inventario():
+    # 1. Filtros (Opcional: por tipo)
+    filtro_tipo = request.args.get('tipo')
+    
+    query = Medicamento.query
+    if filtro_tipo:
+        query = query.filter_by(tipo=filtro_tipo)
+        
+    productos = query.order_by(Medicamento.nombre).all()
+    
+    # Obtener almacenes para el select de "Nueva Alta"
+    almacenes = InventarioFarmacia.query.all()
+    
+    # Contador de alertas para las tabs
+    alertas_count = Medicamento.query.filter(Medicamento.stock <= Medicamento.punto_reorden).count()
+    
+    return render_template('admin_inventario.html', 
+                           productos=productos, 
+                           almacenes=almacenes,
+                           alertas_count=alertas_count,
+                           filtro_actual=filtro_tipo)
+
+@app.route('/guardar_producto', methods=['POST'])
+def guardar_producto():
+    if request.method == 'POST':
+        try:
+            # Convertir fecha caducidad
+            caducidad = None
+            if request.form['fecha_caducidad']:
+                caducidad = datetime.strptime(request.form['fecha_caducidad'], '%Y-%m-%d').date()
+            
+            nuevo_prod = Medicamento(
+                codigo=request.form['codigo'],
+                nombre=request.form['nombre'],
+                tipo=request.form['tipo'],
+                presentacion=request.form['presentacion'],
+                stock=request.form['stock'],
+                lote=request.form['lote'],
+                fecha_caducidad=caducidad,
+                punto_reorden=request.form['punto_reorden'],
+                inventario_id=request.form['inventario_id']
+            )
+            
+            db.session.add(nuevo_prod)
+            db.session.commit()
+            flash('Producto registrado correctamente', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar producto: {str(e)}', 'error')
+            
+        return redirect(url_for('admin_inventario'))
+
+@app.route('/movimiento_stock', methods=['POST'])
+def movimiento_stock():
+    if request.method == 'POST':
+        try:
+            prod_id = request.form['producto_id']
+            tipo_mov = request.form['tipo_movimiento'] # 'entrada' o 'salida'
+            cantidad = int(request.form['cantidad'])
+            
+            producto = Medicamento.query.get_or_404(prod_id)
+            
+            if tipo_mov == 'entrada':
+                producto.stock += cantidad
+                flash(f'Se agregaron {cantidad} unidades a {producto.nombre}', 'success')
+            elif tipo_mov == 'salida':
+                if producto.stock >= cantidad:
+                    producto.stock -= cantidad
+                    flash(f'Se retiraron {cantidad} unidades de {producto.nombre}', 'warning')
+                else:
+                    flash('Error: Stock insuficiente para realizar la salida.', 'error')
+            
+            db.session.commit()
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error en movimiento: {str(e)}', 'error')
+            
+        return redirect(url_for('admin_inventario'))
+
+#RUTAS DE CAPACITACION
+
+@app.route('/admin_capacitacion')
+def admin_capacitacion():
+    # 1. Obtener Cursos y calcular inscritos
+    cursos = Curso.query.all()
+    
+    # 2. Datos para estadísticas del header
+    total_cursos = len(cursos)
+    # Contamos cuántas inscripciones hay en total
+    total_becas = Inscripcion.query.count() 
+    
+    # 3. Obtener listado de evaluaciones (Historial)
+    # Filtramos las que ya tienen progreso o calificación
+    evaluaciones = Inscripcion.query.order_by(Inscripcion.fecha_inscripcion.desc()).all()
+    
+    return render_template('admin_capacitacion.html', 
+                           cursos=cursos,
+                           evaluaciones=evaluaciones,
+                           total_cursos=total_cursos,
+                           total_becas=total_becas)
+
+@app.route('/guardar_curso', methods=['POST'])
+def guardar_curso():
+    if request.method == 'POST':
+        try:
+            # Convertir fechas
+            f_inicio = datetime.strptime(request.form['fecha_inicio'], '%Y-%m-%d').date() if request.form['fecha_inicio'] else None
+            # Fecha fin opcional (si es curso permanente)
+            f_fin_str = request.form.get('fecha_fin')
+            f_fin = datetime.strptime(f_fin_str, '%Y-%m-%d').date() if f_fin_str else None
+
+            nuevo_curso = Curso(
+                nombre=request.form['nombre'],
+                descripcion=request.form['descripcion'],
+                tipo=request.form['tipo'],
+                cupo_max=request.form['cupo'],
+                fecha_inicio=f_inicio,
+                fecha_fin=f_fin
+            )
+            
+            db.session.add(nuevo_curso)
+            db.session.commit()
+            flash('Curso publicado exitosamente', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear curso: {str(e)}', 'error')
+            
+        return redirect(url_for('admin_capacitacion'))
+
+# Opción para inscribir personal (puedes agregar un botón en el futuro)
+@app.route('/inscribir_demo', methods=['GET'])
+def inscribir_demo():
+    # Esta ruta es solo para generar datos de prueba rápidos si lo necesitas
+    try:
+        enf = Enfermero.query.first()
+        cur = Curso.query.first()
+        if enf and cur:
+            ins = Inscripcion(enfermero_id=enf.id, curso_id=cur.id, progreso=50, estado="En Curso")
+            db.session.add(ins)
+            db.session.commit()
+            flash('Inscripción de prueba creada')
+    except:
+        pass
+    return redirect(url_for('admin_capacitacion'))
 
 
+
+
+
+
+
+
+
+#RUTAS DE HOJA DE ENFERMERIA
+#RUTAS DE DASHBOARD DE USUARIO
 
 
 # --- INICIALIZADOR ---
@@ -138,7 +630,50 @@ if __name__ == '__main__':
         # Para evitar conflictos con tu script SQL completo, intentamos solo insertar datos si está vacío
         try:
             db.create_all() 
-            
+            if not Curso.query.first():
+                cursos = [
+                    Curso(nombre="Actualización de Medicamentos IV", tipo="Clínico", cupo_max=20, descripcion="Protocolos para nuevos fármacos en terapia intensiva.", fecha_inicio=datetime(2026, 1, 10)),
+                    Curso(nombre="Educación en Compasión", tipo="Humanización", cupo_max=50, descripcion="Taller práctico sobre empatía y psicología del dolor.", fecha_inicio=datetime(2026, 2, 20)),
+                    Curso(nombre="Manejo de Residuos (RPBI)", tipo="Normativa", cupo_max=100, descripcion="Certificación obligatoria anual.", fecha_inicio=datetime(2026, 1, 1))
+                ]
+                db.session.add_all(cursos)
+                db.session.commit()
+                print("Cursos iniciales creados.")
+            # Crear Turnos por defecto (Solo si no existen)
+            if not Turno.query.first():
+                # Como tu BD pide fecha y tipo, insertamos valores genéricos o NULL si lo permite
+                # Para un catálogo base, usaremos nombres descriptivos en 'nombre'
+                turnos = [
+                    Turno(nombre="Matutino", tipoturno="Matutino"),
+                    Turno(nombre="Vespertino", tipoturno="Vespertino"),
+                    Turno(nombre="Nocturno", tipoturno="Nocturno"),
+                    Turno(nombre="Jornada Acumulada", tipoturno="Fines de Semana")
+                ]
+                db.session.add_all(turnos)
+                db.session.commit()
+                print("Turnos creados correctamente.")
+            #Datos semilla para areas y medicos
+            # Crear Áreas Básicas
+            if not Area.query.first():
+                areas = [
+                    Area(nombre="Urgencias"),
+                    Area(nombre="Pediatría"),
+                    Area(nombre="Consulta Externa"),
+                    Area(nombre="Terapia Intensiva")
+                ]
+                db.session.add_all(areas)
+                db.session.commit()
+                print("Áreas creadas.")
+
+            # Crear Médicos Básicos
+            if not Medico.query.first():
+                medicos = [
+                    Medico(nombre="Dr. Chapatin", apellidos="Gómez", especialidad="General"),
+                    Medico(nombre="Dra. House", apellidos="Gregory", especialidad="Diagnóstico")
+                ]
+                db.session.add_all(medicos)
+                db.session.commit()
+                print("Médicos creados.")
             # Datos semilla solo si no hay roles
             if not RolEnfermeria.query.first():
                 roles = [
@@ -149,6 +684,21 @@ if __name__ == '__main__':
                 db.session.add_all(roles)
                 db.session.commit()
                 print("Roles iniciales insertados.")
+            # Crear Inventario y Medicamentos Demo si no existen
+            if not Medicamento.query.first():
+                inv = InventarioFarmacia(nombre="Almacén Central")
+                db.session.add(inv)
+                db.session.commit()
+                
+                meds = [
+                    Medicamento(nombre="Paracetamol 500mg", stock=120, inventario_id=inv.id),
+                    Medicamento(nombre="Insulina Glargina", stock=2, inventario_id=inv.id), # Alerta
+                    Medicamento(nombre="Gasas Estériles", stock=5, inventario_id=inv.id),   # Alerta
+                    Medicamento(nombre="Ketorolaco", stock=50, inventario_id=inv.id)
+                ]
+                db.session.add_all(meds)
+                db.session.commit()
+                print("Datos de farmacia creados.")
         except Exception as e:
             print(f"Advertencia de inicialización: {e}")
 

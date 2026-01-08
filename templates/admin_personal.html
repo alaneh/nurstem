@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" type="image/jpg">
 </head>
 <body>
 
@@ -18,10 +19,12 @@
                 <h2>Nurstem</h2>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-link">Dashboard</a>
                 <a href="{{ url_for('admin_personal') }}" class="nav-link active">Personal</a>
-                <a href="#" class="nav-link">Pacientes</a>
-                <a href="#" class="nav-link">Cerrar Sesión</a>
+                <a href="{{ url_for('admin_pacientes') }}" class="nav-link">Pacientes</a>
+                <a href="{{ url_for('admin_asignaciones') }}" class="nav-link">Asignaciones</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('admin_capacitacion') }}" class="nav-link">Capacitación</a>
+                <a href="{{ url_for('admin_inventario') }}" class="nav-link">Inventario</a>
             </nav>
         </aside>
 

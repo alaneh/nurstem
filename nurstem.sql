@@ -121,18 +121,23 @@ CREATE TABLE InventarioFarmacia (
     area_id INT UNIQUE, -- Relación 1 a 1 con Área
     FOREIGN KEY (area_id) REFERENCES Area(id)
 );
-
--- Tabla para los medicamentos
-CREATE TABLE Medicamento (
+--medicamento acutalizado
+CREATE TABLE medicamento (
     id SERIAL PRIMARY KEY,
+    codigo VARCHAR(50) UNIQUE,           -- Ej: MED-001
     nombre VARCHAR(150) NOT NULL,
-    descripcion TEXT,
-    concentracion VARCHAR(100),
-    formaFarmaceutica VARCHAR(100),
-    stock INT,
+    tipo VARCHAR(50),                    -- Ej: Medicamento, Material, Solución
+    presentacion VARCHAR(100),           -- Ej: Caja 20 tabs
+    stock INTEGER DEFAULT 0,
     lote VARCHAR(100),
-    inventario_id INT,
-    FOREIGN KEY (inventario_id) REFERENCES InventarioFarmacia(id)
+    fecha_caducidad DATE,                -- Cambio importante: DATE en lugar de String
+    punto_reorden INTEGER DEFAULT 10,    -- Para las alertas de stock bajo
+    inventario_id INTEGER,               -- Relación con la ubicación (Farmacia/Almacén)
+    
+    -- Definición de la clave foránea
+    CONSTRAINT fk_inventario
+      FOREIGN KEY(inventario_id) 
+      REFERENCES inventariofarmacia(id)
 );
 
 -- Tabla para otros insumos médicos

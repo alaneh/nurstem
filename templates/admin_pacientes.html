@@ -4,46 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Directorio de Pacientes - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" type="image/jpg">
 </head>
 <body>
 
     <div class="main-layout">
-        
         <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
+            <div class="brand"><h2>Nurstem</h2></div>
             <nav class="nav-menu">
-                <a href="admin_dashboard.html" class="nav-link">Dashboard</a>
-                <a href="admin_personal.html" class="nav-link">Personal</a>
-                <a href="admin_pacientes.html" class="nav-link active">Pacientes</a>
-                <a href="admin_asignaciones.html" class="nav-link">Asignaciones</a>
-                <a href="admin_inventario.html" class="nav-link">Inventario</a>
-                <a href="admin_capacitacion.html" class="nav-link">Capacitación</a>
-                <a href="#" class="nav-link">Cerrar Sesión</a>
+                <a href="{{ url_for('admin_personal') }}" class="nav-link">Personal</a>
+                <a href="{{ url_for('admin_pacientes') }}" class="nav-link active">Pacientes</a>
+                <a href="{{ url_for('admin_asignaciones') }}" class="nav-link">Asignaciones</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('admin_capacitacion') }}" class="nav-link">Capacitación</a>
+                <a href="{{ url_for('admin_inventario') }}" class="nav-link">Inventario</a>
             </nav>
         </aside>
 
         <main class="content-area">
-            
             <div class="module-container">
+                
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <div class="alert alert-success">
+                      {% for message in messages %}{{ message }}{% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
                 <div class="toolbar">
                     <div class="toolbar-info">
                         <h1>Directorio de Pacientes</h1>
-                        <p>Registro de ingresos, historial y ubicación actual</p>
+                        <p>Registro de ingresos e historial</p>
                     </div>
                     <div class="toolbar-actions">
-                        <input type="text" class="search-bar" placeholder="Buscar por nombre o expediente...">
-                        
-                        <button class="btn-primary" onclick="openModal()">
-                            <span>+</span> Nuevo Ingreso
-                        </button>
+                        <button class="btn-primary" onclick="openModal()"><span>+</span> Nuevo Ingreso</button>
                     </div>
                 </div>
             
@@ -51,95 +49,86 @@
                     <table class="table-data">
                         <thead>
                             <tr>
-                                <th>Expediente</th>
+                                <th>ID</th>
                                 <th>Paciente</th>
-                                <th>Fecha Ingreso</th>
-                                <th>Ubicación Actual</th>
-                                <th>Médico Tratante</th>
-                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Médico</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for paciente in pacientes %}
                             <tr>
-                                <td>#P-2024-001</td>
+                                <td>#{{ paciente.id }}</td>
                                 <td>
-                                    <div class="user-name">Roberto Gómez Bolaños</div>
-                                    <div class="user-email">75 años • Masc</div>
+                                    <div class="user-name">{{ paciente.nombre }} {{ paciente.apellidos }}</div>
+                                    <div class="user-email">
+                                        {{ paciente.genero }} • {{ paciente.fecha_nacimiento }}
+                                    </div>
                                 </td>
-                                <td>06/01/2026</td>
-                                <td>Urgencias - Cama 3</td>
-                                <td>Dr. Chapatin</td>
-                                <td><span class="status-badge status-warning">En Observación</span></td>
                                 <td>
-                                    <button class="btn-icon" title="Editar Datos">✎</button>
-                                    <button class="btn-icon" title="Ver Historial Clínico">📋</button>
+                                    {% if paciente.area %}
+                                        <span class="status-badge status-active">{{ paciente.area.nombre }}</span>
+                                    {% else %}
+                                        <span class="status-badge status-warning">Sin Asignar</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ paciente.medico.nombre if paciente.medico else 'Por asignar' }}</td>
+                                <td>
+                                    <button class="btn-icon" title="Editar"
+                                        onclick="openEditModal(this)"
+                                        data-id="{{ paciente.id }}"
+                                        data-nombre="{{ paciente.nombre }}"
+                                        data-apellidos="{{ paciente.apellidos }}"
+                                        data-fecha="{{ paciente.fecha_nacimiento }}"
+                                        data-genero="{{ paciente.genero }}"
+                                        data-telefono="{{ paciente.telefono }}"
+                                        data-direccion="{{ paciente.direccion }}"
+                                        data-area="{{ paciente.area_id }}"
+                                        data-medico="{{ paciente.medico_id }}">
+                                        ✎
+                                    </button>
+                                    <a href="{{ url_for('eliminar_paciente', id=paciente.id) }}" 
+                                       class="btn-icon btn-delete" 
+                                       onclick="return confirm('¿Eliminar registro?')" title="Eliminar">🗑</a>
                                 </td>
                             </tr>
-                            
-                            <tr>
-                                <td>#P-2024-045</td>
-                                <td>
-                                    <div class="user-name">María Antonieta de las Nieves</div>
-                                    <div class="user-email">8 años • Fem</div>
-                                </td>
-                                <td>03/01/2026</td>
-                                <td>Pediatría - Piso 1</td>
-                                <td>Dra. Lula Enfermera</td>
-                                <td><span class="status-badge status-active">Hospitalizado</span></td>
-                                <td>
-                                    <button class="btn-icon" title="Editar Datos">✎</button>
-                                    <button class="btn-icon" title="Ver Historial Clínico">📋</button>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>#P-2023-899</td>
-                                <td>
-                                    <div class="user-name">Ramón Valdés</div>
-                                    <div class="user-email">54 años • Masc</div>
-                                </td>
-                                <td>28/12/2025</td>
-                                <td>-</td>
-                                <td>Dr. Buen Samaritano</td>
-                                <td><span class="status-badge status-inactive">Alta Médica</span></td>
-                                <td>
-                                    <button class="btn-icon" title="Reingresar">↺</button>
-                                    <button class="btn-icon" title="Archivo">📂</button>
-                                </td>
-                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" style="text-align:center; padding:2rem;">No hay pacientes registrados.</td></tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </main>
     </div>
 
     <div id="modalPacientes" class="modal">
-        <div class="modal-content modal-lg"> <h2 class="modal-title">Registrar Nuevo Ingreso</h2>
-            <form action="#" method="POST">
-                
-                <h4 class="form-section-title">Datos de Identificación</h4>
-                
+        <div class="modal-content modal-lg">
+            <h2 id="modalTitle" class="modal-title">Registrar Nuevo Ingreso</h2>
+            
+            <form id="formPaciente" action="{{ url_for('guardar_paciente') }}" method="POST">
+                <input type="hidden" id="paciente_id" name="id">
+
+                <h4 class="form-section-title">Datos Personales</h4>
                 <div class="form-row">
                     <div class="form-group col-half">
-                        <label for="nombre">Nombre(s)</label>
+                        <label>Nombre(s)</label>
                         <input type="text" id="nombre" name="nombre" class="form-input" required>
                     </div>
                     <div class="form-group col-half">
-                        <label for="apellidos">Apellidos</label>
+                        <label>Apellidos</label>
                         <input type="text" id="apellidos" name="apellidos" class="form-input" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-third">
-                        <label for="fechaNacimiento">Fecha de Nacimiento</label>
-                        <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="form-input" required>
+                        <label>Fecha Nacimiento</label>
+                        <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="form-input">
                     </div>
                     <div class="form-group col-third">
-                        <label for="genero">Género</label>
+                        <label>Género</label>
                         <select id="genero" name="genero" class="form-select">
                             <option value="M">Masculino</option>
                             <option value="F">Femenino</option>
@@ -147,45 +136,41 @@
                         </select>
                     </div>
                     <div class="form-group col-third">
-                        <label for="telefono">Teléfono Contacto</label>
-                        <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="Emergencia">
+                        <label>Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" class="form-input">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="direccion">Dirección Domiciliaria</label>
-                    <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Calle y número">
+                    <label>Dirección</label>
+                    <input type="text" id="direccion" name="direccion" class="form-input">
                 </div>
 
-                <h4 class="form-section-title" style="margin-top: 1.5rem;">Datos de Ingreso</h4>
-
+                <h4 class="form-section-title" style="margin-top: 1rem;">Datos de Ingreso</h4>
                 <div class="form-row">
                     <div class="form-group col-half">
-                        <label for="area_id">Área de Ingreso</label>
+                        <label>Área de Ingreso</label>
                         <select id="area_id" name="area_id" class="form-select">
-                            <option value="1" selected>Urgencias General</option>
-                            <option value="2">Urgencias Pediatría</option>
-                            <option value="3">Consulta Externa</option>
+                            <option value="">Seleccione...</option>
+                            {% for area in areas %}
+                                <option value="{{ area.id }}">{{ area.nombre }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group col-half">
-                        <label for="medico_id">Médico Asignado (Guardia)</label>
+                        <label>Médico Tratante</label>
                         <select id="medico_id" name="medico_id" class="form-select">
                             <option value="">Por asignar...</option>
-                            <option value="10">Dr. En Turno 1</option>
-                            <option value="11">Dr. En Turno 2</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}">{{ medico.nombre }} {{ medico.apellidos }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="motivo">Motivo de Ingreso (Breve)</label>
-                    <input type="text" id="motivo" name="motivo" class="form-input" placeholder="Ej. Dolor abdominal agudo">
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
-                    <button type="submit" class="btn-primary">Registrar Ingreso</button>
+                    <button type="submit" id="btnSubmit" class="btn-primary">Registrar</button>
                 </div>
             </form>
         </div>
@@ -193,20 +178,44 @@
 
     <script>
         const modal = document.getElementById('modalPacientes');
+        const form = document.getElementById('formPaciente');
+        const title = document.getElementById('modalTitle');
+        const btn = document.getElementById('btnSubmit');
 
         function openModal() {
+            form.reset();
+            document.getElementById('paciente_id').value = '';
+            title.innerText = "Registrar Nuevo Ingreso";
+            btn.innerText = "Registrar";
+            form.action = "{{ url_for('guardar_paciente') }}";
             modal.style.display = 'flex';
         }
 
-        function closeModal() {
-            modal.style.display = 'none';
+        function openEditModal(elem) {
+            // Llenar campos
+            document.getElementById('paciente_id').value = elem.getAttribute('data-id');
+            document.getElementById('nombre').value = elem.getAttribute('data-nombre');
+            document.getElementById('apellidos').value = elem.getAttribute('data-apellidos');
+            document.getElementById('fechaNacimiento').value = elem.getAttribute('data-fecha');
+            document.getElementById('genero').value = elem.getAttribute('data-genero');
+            document.getElementById('telefono').value = elem.getAttribute('data-telefono') === 'None' ? '' : elem.getAttribute('data-telefono');
+            document.getElementById('direccion').value = elem.getAttribute('data-direccion') === 'None' ? '' : elem.getAttribute('data-direccion');
+            
+            // Llenar selects (si es 'None' deja el default)
+            const area = elem.getAttribute('data-area');
+            const medico = elem.getAttribute('data-medico');
+            if(area && area !== 'None') document.getElementById('area_id').value = area;
+            if(medico && medico !== 'None') document.getElementById('medico_id').value = medico;
+
+            // Cambiar modo
+            title.innerText = "Editar Paciente";
+            btn.innerText = "Actualizar";
+            form.action = "{{ url_for('actualizar_paciente') }}";
+            modal.style.display = 'flex';
         }
 
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
+        function closeModal() { modal.style.display = 'none'; }
+        window.onclick = function(e) { if(e.target == modal) closeModal(); }
     </script>
 </body>
 </html>
