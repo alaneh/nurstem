@@ -4,28 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Triage y Admisión - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/nurse.css"> 
-    <link rel="stylesheet" href="css/forms.css"> <link rel="stylesheet" href="css/triage.css"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nurse.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/triage.css') }}">
+</head>
 <body>
 
     <div class="main-layout">
         
         <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
+            <div class="brand"><h2>Nurstem</h2></div>
             <nav class="nav-menu">
-                <a href="user_dashboard.html" class="nav-link">Mis Pacientes</a>
-                <a href="consumo_insumos.html" class="nav-link">Solicitar Insumos</a>
-                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
-                <a href="triage_ingreso.html" class="nav-link active">Admisión Urgencias</a>
-                <div class="nav-separator"></div>
-                <a href="#" class="nav-link">Cerrar Turno</a>
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link">Mis Pacientes</a>
+                <a href="{{ url_for('triage_ingreso') }}" class="nav-link active">Admisión Urgencias</a>
             </nav>
             
             <div class="user-profile-widget">
@@ -39,116 +32,105 @@
 
         <main class="content-area">
             
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div style="margin-bottom: 20px;">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="padding: 15px; background: #dcfce7; color: #166534; border-radius: 8px; border: 1px solid #bbf7d0;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
             <div class="triage-wrapper">
-                
                 <div class="triage-header">
                     <h1>Valoración Triage</h1>
                     <p>Clasificación de riesgo para atención médica</p>
                 </div>
 
-                <form action="#" method="POST" id="triageForm">
+                <form action="{{ url_for('guardar_triage') }}" method="POST" id="triageForm">
                     
                     <div class="triage-layout">
                         
                         <div class="triage-column">
                             <h3 class="column-title">1. Identificación</h3>
-                            
                             <div class="card-white">
                                 <div class="form-group">
-                                    <label>Buscar Paciente (Historial)</label>
-                                    <div class="search-row">
-                                        <input type="text" class="form-input" placeholder="Nombre o CURP...">
-                                        <button type="button" class="btn-secondary">Buscar</button>
-                                    </div>
-                                </div>
-                                <hr class="divider">
-                                <div class="form-group">
                                     <label>Nombre(s) *</label>
-                                    <input type="text" class="form-input" required placeholder="Nombre del paciente">
+                                    <input type="text" name="nombre" class="form-input" required placeholder="Nombre del paciente">
                                 </div>
                                 <div class="form-group">
                                     <label>Apellidos *</label>
-                                    <input type="text" class="form-input" required placeholder="Apellidos">
+                                    <input type="text" name="apellidos" class="form-input" required placeholder="Apellidos">
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-half">
-                                        <label>Edad</label>
-                                        <input type="number" class="form-input" placeholder="Años">
+                                        <label>Edad (Aprox)</label>
+                                        <input type="number" name="edad" class="form-input" placeholder="Años">
                                     </div>
                                     <div class="form-group col-half">
                                         <label>Género</label>
-                                        <select class="form-select">
-                                            <option>Masculino</option>
-                                            <option>Femenino</option>
-                                            <option>Otro</option>
+                                        <select name="genero" class="form-select">
+                                            <option value="M">Masculino</option>
+                                            <option value="F">Femenino</option>
+                                            <option value="NB">No Binario</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Motivo de Consulta (Queja Principal) *</label>
-                                    <textarea class="form-input" rows="3" placeholder="Ej. Dolor torácico opresivo, dificultad para respirar..."></textarea>
+                                    <label>Motivo de Consulta *</label>
+                                    <textarea name="motivo" class="form-input" rows="3" required placeholder="Ej. Dolor torácico..."></textarea>
                                 </div>
                             </div>
                         </div>
 
                         <div class="triage-column">
                             <h3 class="column-title">2. Signos Vitales</h3>
-                            
                             <div class="card-white">
                                 <div class="vitals-grid-triage">
-                                    
                                     <div class="vital-input-group">
                                         <label>Frec. Cardiaca</label>
-                                        <input type="number" id="hr" class="input-clinical" placeholder="lpm" oninput="autoTriage()">
+                                        <input type="number" name="hr" id="hr" class="input-clinical" placeholder="lpm" oninput="autoTriage()">
                                     </div>
-
                                     <div class="vital-input-group">
                                         <label>Sat. Oxígeno %</label>
-                                        <input type="number" id="spo2" class="input-clinical" placeholder="%" oninput="autoTriage()">
+                                        <input type="number" name="spo2" id="spo2" class="input-clinical" placeholder="%" oninput="autoTriage()">
                                     </div>
-
                                     <div class="vital-input-group">
                                         <label>Temp. °C</label>
-                                        <input type="number" id="temp" class="input-clinical" placeholder="°C" step="0.1" oninput="autoTriage()">
+                                        <input type="number" name="temp" id="temp" class="input-clinical" placeholder="°C" step="0.1" oninput="autoTriage()">
                                     </div>
-
                                     <div class="vital-input-group">
                                         <label>T.A. Sistólica</label>
-                                        <input type="number" id="sys" class="input-clinical" placeholder="mmHg">
+                                        <input type="number" name="sys" id="sys" class="input-clinical" placeholder="mmHg">
                                     </div>
-
                                     <div class="vital-input-group">
                                         <label>T.A. Diastólica</label>
-                                        <input type="number" id="dia" class="input-clinical" placeholder="mmHg">
+                                        <input type="number" name="dia" id="dia" class="input-clinical" placeholder="mmHg">
                                     </div>
-
                                     <div class="vital-input-group">
                                         <label>Escala Dolor (0-10)</label>
-                                        <input type="number" id="pain" class="input-clinical" placeholder="EVA" max="10" oninput="autoTriage()">
+                                        <input type="number" name="pain" id="pain" class="input-clinical" placeholder="EVA" max="10" oninput="autoTriage()">
                                     </div>
-                                    
                                     <div class="vital-input-group">
                                         <label>Glucosa (mg/dL)</label>
-                                        <input type="number" class="input-clinical" placeholder="Opcional">
+                                        <input type="number" name="glucosa" class="input-clinical" placeholder="Opcional">
                                     </div>
-
                                 </div>
                             </div>
                         </div>
 
                         <div class="triage-column">
                             <h3 class="column-title">3. Clasificación</h3>
-                            
                             <div class="triage-selector-container">
                                 
                                 <label class="triage-option option-red">
-                                    <input type="radio" name="triageLevel" value="1" id="radioRed">
+                                    <input type="radio" name="triageLevel" value="1" id="radioRed" required>
                                     <div class="triage-card">
                                         <div class="level-number">I</div>
-                                        <div class="level-info">
-                                            <strong>Emergencia (Rojo)</strong>
-                                            <span>Atención Inmediata</span>
-                                        </div>
+                                        <div class="level-info"><strong>Emergencia (Rojo)</strong><span>Atención Inmediata</span></div>
                                     </div>
                                 </label>
 
@@ -156,10 +138,7 @@
                                     <input type="radio" name="triageLevel" value="2" id="radioOrange">
                                     <div class="triage-card">
                                         <div class="level-number">II</div>
-                                        <div class="level-info">
-                                            <strong>Urgencia (Naranja)</strong>
-                                            <span>&lt; 15 minutos</span>
-                                        </div>
+                                        <div class="level-info"><strong>Urgencia (Naranja)</strong><span>&lt; 15 minutos</span></div>
                                     </div>
                                 </label>
 
@@ -167,21 +146,15 @@
                                     <input type="radio" name="triageLevel" value="3" id="radioYellow">
                                     <div class="triage-card">
                                         <div class="level-number">III</div>
-                                        <div class="level-info">
-                                            <strong>Urgencia Menor (Amarillo)</strong>
-                                            <span>&lt; 30 minutos</span>
-                                        </div>
+                                        <div class="level-info"><strong>Urgencia Menor (Amarillo)</strong><span>&lt; 30 minutos</span></div>
                                     </div>
                                 </label>
 
                                 <label class="triage-option option-green">
-                                    <input type="radio" name="triageLevel" value="4" id="radioGreen">
+                                    <input type="radio" name="triageLevel" value="4" id="radioGreen" checked>
                                     <div class="triage-card">
                                         <div class="level-number">IV</div>
-                                        <div class="level-info">
-                                            <strong>No Urgente (Verde)</strong>
-                                            <span>&lt; 120 minutos</span>
-                                        </div>
+                                        <div class="level-info"><strong>No Urgente (Verde)</strong><span>&lt; 120 minutos</span></div>
                                     </div>
                                 </label>
 
@@ -189,29 +162,21 @@
                                     <input type="radio" name="triageLevel" value="5" id="radioBlue">
                                     <div class="triage-card">
                                         <div class="level-number">V</div>
-                                        <div class="level-info">
-                                            <strong>Consulta (Azul)</strong>
-                                            <span>&lt; 180 minutos</span>
-                                        </div>
+                                        <div class="level-info"><strong>Consulta (Azul)</strong><span>&lt; 180 minutos</span></div>
                                     </div>
                                 </label>
 
                             </div>
 
                             <div class="triage-footer">
-                                <div class="suggestion-box" id="suggestionBox" style="display: none;">
-                                    ⚠️ Sugerencia: <strong>Nivel Rojo</strong> por SatO2 baja.
-                                </div>
+                                <div class="suggestion-box" id="suggestionBox" style="display: none;"></div>
                                 <button type="submit" class="btn-primary btn-block-large">Confirmar e Ingresar Paciente</button>
                             </div>
-
                         </div>
 
                     </div>
                 </form>
-
             </div>
-
         </main>
     </div>
 
@@ -223,9 +188,8 @@
             const pain = parseInt(document.getElementById('pain').value) || 0;
             
             let suggestion = null;
-            let levelId = 'radioGreen'; // Default
+            let levelId = null;
 
-            // Lógica simple de ejemplo para UT 113
             if (spo2 < 90 || hr > 130 || hr < 40) {
                 suggestion = "Nivel Rojo (Signos Vitales Críticos)";
                 levelId = 'radioRed';
@@ -237,12 +201,11 @@
                 levelId = 'radioYellow';
             }
 
-            // Mostrar sugerencia visual
             const box = document.getElementById('suggestionBox');
             if (suggestion) {
-                box.innerHTML = "⚠️ Sistema sugiere: <strong>" + suggestion + "</strong>";
+                box.innerHTML = "⚠️ Sugerencia del Sistema: <strong>" + suggestion + "</strong>";
                 box.style.display = 'block';
-                document.getElementById(levelId).checked = true; // Auto-seleccionar
+                document.getElementById(levelId).checked = true;
             } else {
                 box.style.display = 'none';
             }

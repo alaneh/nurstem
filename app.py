@@ -143,6 +143,94 @@ class Inscripcion(db.Model):
     enfermero = db.relationship('Enfermero', backref='cursos_inscritos')
     
 
+### MODULOS DE USUARIO ###
+class Triage(db.Model):
+    __tablename__ = 'triage'
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_hora = db.Column(db.DateTime, default=datetime.now)
+    motivo_consulta = db.Column(db.Text)
+    
+    # Signos Vitales
+    frecuencia_cardiaca = db.Column(db.Integer)
+    saturacion_oxigeno = db.Column(db.Integer)
+    temperatura = db.Column(db.Float)
+    tension_arterial = db.Column(db.String(20))
+    escala_dolor = db.Column(db.Integer)
+    glucosa = db.Column(db.Integer)
+    
+    # Clasificación (1=Rojo, 2=Naranja, 3=Amarillo, 4=Verde, 5=Azul)
+    nivel_urgencia = db.Column(db.Integer)
+    
+    # Relación
+    paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'))
+    paciente = db.relationship('Paciente', backref='triages')
+
+# --- MODELOS HOJA DE ENFERMERÍA ---
+
+class HojaEnfermeria(db.Model):
+    __tablename__ = 'hoja_enfermeria'
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.Date, default=datetime.utcnow)
+    paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'))
+    enfermero_id = db.Column(db.Integer, db.ForeignKey('enfermero.id'))
+    
+    # Relaciones
+    vitales = db.relationship('RegistroVitales', backref='hoja', lazy=True)
+    notas = db.relationship('NotaEnfermeria', backref='hoja', lazy=True)
+    medicamentos_admin = db.relationship('AdministracionMedicamento', backref='hoja', lazy=True)
+
+class RegistroVitales(db.Model):
+    __tablename__ = 'registro_vitales'
+    id = db.Column(db.Integer, primary_key=True)
+    hora = db.Column(db.Time, nullable=False)
+    ta_sistolica = db.Column(db.Integer)
+    ta_diastolica = db.Column(db.Integer)
+    frecuencia_cardiaca = db.Column(db.Integer)
+    frecuencia_respiratoria = db.Column(db.Integer)
+    temperatura = db.Column(db.Float)
+    saturacion = db.Column(db.Integer)
+    hoja_id = db.Column(db.Integer, db.ForeignKey('hoja_enfermeria.id'))
+
+class NotaEnfermeria(db.Model):
+    __tablename__ = 'nota_enfermeria'
+    id = db.Column(db.Integer, primary_key=True)
+    hora = db.Column(db.Time, nullable=False)
+    nota = db.Column(db.Text, nullable=False)
+    tipo = db.Column(db.String(50))
+    hoja_id = db.Column(db.Integer, db.ForeignKey('hoja_enfermeria.id'))
+
+class AdministracionMedicamento(db.Model):
+    __tablename__ = 'administracion_medicamento'
+    id = db.Column(db.Integer, primary_key=True)
+    hora = db.Column(db.Time, nullable=False)
+    medicamento_nombre = db.Column(db.String(150))
+    dosis = db.Column(db.String(100))
+    via = db.Column(db.String(50))
+    observaciones = db.Column(db.Text)
+    hoja_id = db.Column(db.Integer, db.ForeignKey('hoja_enfermeria.id'))
+
+class HistorialConsumo(db.Model):
+    __tablename__ = 'historial_consumo' # Coincide con tu tabla SQL
+    
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_hora = db.Column(db.DateTime, default=datetime.now)
+    cantidad = db.Column(db.Integer, nullable=False)
+    motivo = db.Column(db.String(100))
+    
+    # Claves foráneas (Foreign Keys)
+    medicamento_id = db.Column(db.Integer, db.ForeignKey('medicamento.id'))
+    enfermero_id = db.Column(db.Integer, db.ForeignKey('enfermero.id'))
+    paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'), nullable=True)
+    
+    # Relaciones (Para poder usar .producto, .enfermero en el HTML)
+    producto = db.relationship('Medicamento', backref='consumos')
+    enfermero = db.relationship('Enfermero', backref='consumos')
+    paciente = db.relationship('Paciente', backref='consumos')
+
+
+
+
+
 
 
 
@@ -608,15 +696,347 @@ def inscribir_demo():
     return redirect(url_for('admin_capacitacion'))
 
 
+# --- RUTA USER DASHBOARD ---
+
+@app.route('/user_dashboard')
+def user_dashboard():
+    # -----------------------------------------------------------------
+    # SIMULACIÓN DE LOGIN: Asumimos que entra el Enfermero #1
+    # Para probar con otros, cambia este número por otro ID existente.
+    current_user_id = 1 
+    # -----------------------------------------------------------------
+    
+    # 1. Obtener datos del enfermero
+    enfermero = Enfermero.query.get(current_user_id)
+    if not enfermero:
+        return "<h3>Error: No existe el enfermero con ID 1. Crea personal primero en el Admin.</h3>"
+    
+    # 2. Buscar si tiene ASIGNACIÓN para el día de HOY
+    hoy = datetime.now().date()
+    asignacion = Asignacion.query.filter_by(
+        enfermero_id=current_user_id, 
+        fecha=hoy
+    ).first()
+    
+    # Variables por defecto (si no tiene turno hoy)
+    pacientes_asignados = []
+    area_nombre = "Sin Asignación"
+    turno_nombre = "--"
+    
+    if asignacion:
+        area_nombre = asignacion.area.nombre
+        turno_nombre = asignacion.turno.nombre
+        
+        # 3. Filtrar PACIENTES que estén en esa misma Área
+        pacientes_asignados = Paciente.query.filter_by(area_id=asignacion.area_id).all()
+
+    return render_template('user_dashboard.html', 
+                           usuario=enfermero,
+                           pacientes=pacientes_asignados,
+                           area_actual=area_nombre,
+                           turno_actual=turno_nombre,
+                           fecha_actual=hoy)
+
+#RUTAS TRIAGE
+@app.route('/triage_ingreso')
+def triage_ingreso():
+    return render_template('triage_ingreso.html')
+
+@app.route('/guardar_triage', methods=['POST'])
+def guardar_triage():
+    if request.method == 'POST':
+        try:
+            # 1. Primero creamos o actualizamos al PACIENTE
+            # (En un sistema real, buscarías si ya existe, aquí creamos uno nuevo por simplicidad)
+            nuevo_paciente = Paciente(
+                nombre=request.form['nombre'],
+                apellidos=request.form['apellidos'],
+                genero=request.form['genero'],
+                # Edad es un cálculo, pero si tu modelo Paciente pide fecha_nacimiento, 
+                # podrías estimarla o dejarla null. Aquí lo dejamos pendiente o guardamos null.
+                fecha_nacimiento=None 
+            )
+            db.session.add(nuevo_paciente)
+            db.session.flush() # Esto genera el ID del paciente sin hacer commit final aún
+            
+            # 2. Guardamos el registro de TRIAGE vinculado al paciente
+            nuevo_triage = Triage(
+                paciente_id=nuevo_paciente.id,
+                motivo_consulta=request.form['motivo'],
+                
+                # Signos Vitales
+                frecuencia_cardiaca=request.form['hr'] or None,
+                saturacion_oxigeno=request.form['spo2'] or None,
+                temperatura=request.form['temp'] or None,
+                tension_arterial=f"{request.form['sys']}/{request.form['dia']}", # Guardamos como "120/80"
+                escala_dolor=request.form['pain'] or None,
+                glucosa=request.form['glucosa'] or None,
+                
+                # Nivel (Radio Button)
+                nivel_urgencia=request.form['triageLevel']
+            )
+            
+            db.session.add(nuevo_triage)
+            db.session.commit()
+            
+            flash('Paciente ingresado y clasificado correctamente.', 'success')
+            return redirect(url_for('triage_ingreso'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar triage: {str(e)}', 'error')
+            return redirect(url_for('triage_ingreso'))
 
 
 
-
-
-
+#
 
 #RUTAS DE HOJA DE ENFERMERIA
-#RUTAS DE DASHBOARD DE USUARIO
+@app.route('/hoja_enfermeria/<int:paciente_id>')
+def hoja_view(paciente_id):
+    # 1. Obtener Paciente
+    paciente = Paciente.query.get_or_404(paciente_id)
+    
+    # 2. Buscar si ya existe una hoja para HOY
+    hoy = datetime.now().date()
+    hoja = HojaEnfermeria.query.filter_by(paciente_id=paciente_id, fecha=hoy).first()
+    
+    # 3. Si no existe, la creamos automáticamente (vinculada al usuario actual ID 1)
+    if not hoja:
+        nueva_hoja = HojaEnfermeria(paciente_id=paciente_id, enfermero_id=1, fecha=hoy)
+        db.session.add(nueva_hoja)
+        db.session.commit()
+        hoja = nueva_hoja
+    
+    # 4. Obtener catálogo de medicamentos para el select
+    catalogo_meds = Medicamento.query.all()
+    
+    return render_template('hoja_enfermeria.html', 
+                           paciente=paciente, 
+                           hoja=hoja, 
+                           medicamentos=catalogo_meds,
+                           now=datetime.now()) # Para poner hora default en inputs
+
+@app.route('/guardar_registro_clinico', methods=['POST'])
+def guardar_registro_clinico():
+    if request.method == 'POST':
+        try:
+            tipo_registro = request.form['tipo_registro'] # 'vitales', 'nota', 'medicamento'
+            hoja_id = request.form['hoja_id']
+            paciente_id = request.form['paciente_id']
+            hora_actual = datetime.now().time()
+            
+            if tipo_registro == 'vitales':
+                nuevo = RegistroVitales(
+                    hora=hora_actual,
+                    ta_sistolica=request.form['ta_sys'],
+                    ta_diastolica=request.form['ta_dia'],
+                    frecuencia_cardiaca=request.form['fc'],
+                    frecuencia_respiratoria=request.form['fr'],
+                    temperatura=request.form['temp'],
+                    saturacion=request.form['spo2'],
+                    hoja_id=hoja_id
+                )
+                db.session.add(nuevo)
+                flash('Signos vitales registrados.', 'success')
+
+            elif tipo_registro == 'nota':
+                nuevo = NotaEnfermeria(
+                    hora=hora_actual,
+                    nota=request.form['nota_texto'],
+                    tipo=request.form['tipo_nota'],
+                    hoja_id=hoja_id
+                )
+                db.session.add(nuevo)
+                flash('Nota de evolución agregada.', 'success')
+                
+            elif tipo_registro == 'medicamento':
+                # Puede venir de un select o texto libre
+                nombre_med = request.form.get('nombre_med_select') or request.form.get('nombre_med_text')
+                
+                nuevo = AdministracionMedicamento(
+                    hora=hora_actual,
+                    medicamento_nombre=nombre_med,
+                    dosis=request.form['dosis'],
+                    via=request.form['via'],
+                    observaciones=request.form['obs_med'],
+                    hoja_id=hoja_id
+                )
+                db.session.add(nuevo)
+                
+                # Descontar stock (Lógica simple)
+                med_obj = Medicamento.query.filter_by(nombre=nombre_med).first()
+                if med_obj and med_obj.stock > 0:
+                    med_obj.stock -= 1
+                
+                flash('Medicamento registrado y descontado del stock.', 'success')
+
+            db.session.commit()
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar: {str(e)}', 'error')
+            
+        return redirect(url_for('hoja_view', paciente_id=paciente_id))
+
+
+#RUTAS DE Consumo de insumos
+
+@app.route('/consumo_insumos')
+def consumo_insumos():
+    # 1. Simulación de usuario logueado (Enfermero ID 1)
+    current_user_id = 1
+    
+    # 2. Obtener lista de insumos (Filtramos por Material y Soluciones, excluyendo medicamentos puros si quieres)
+    # O mostramos todo. Aquí filtramos para mostrar solo 'Material' y 'Solucion' para este módulo.
+    insumos = Medicamento.query.filter(Medicamento.tipo.in_(['Material', 'Solucion'])).order_by(Medicamento.nombre).all()
+    
+    # 3. Obtener pacientes del área donde está asignado el enfermero hoy
+    hoy = datetime.now().date()
+    asignacion = Asignacion.query.filter_by(enfermero_id=current_user_id, fecha=hoy).first()
+    
+    pacientes = []
+    area_nombre = "Sin Asignación"
+    if asignacion:
+        pacientes = Paciente.query.filter_by(area_id=asignacion.area_id).all()
+        area_nombre = asignacion.area.nombre
+        
+    # 4. Historial reciente de este enfermero (últimos 10)
+    historial = HistorialConsumo.query.filter_by(enfermero_id=current_user_id)\
+                .order_by(HistorialConsumo.fecha_hora.desc()).limit(10).all()
+
+    return render_template('consumo_insumos.html', 
+                           insumos=insumos, 
+                           pacientes=pacientes, 
+                           historial=historial,
+                           area_actual=area_nombre,
+                           now=datetime.now())
+
+
+###RUTAS DE PORTAL DE CAPACITACION
+@app.route('/registrar_consumo_rapido', methods=['POST'])
+def registrar_consumo_rapido():
+    if request.method == 'POST':
+        try:
+            prod_id = request.form['producto_id']
+            cantidad = int(request.form['cantidad'])
+            paciente_id = request.form.get('paciente_id') # Puede venir vacío si es uso general
+            motivo = request.form['motivo']
+            
+            # Validaciones
+            if not paciente_id: paciente_id = None
+            
+            producto = Medicamento.query.get(prod_id)
+            
+            if producto and producto.stock >= cantidad:
+                # 1. Descontar Stock
+                producto.stock -= cantidad
+                
+                # 2. Guardar Historial
+                nuevo_consumo = HistorialConsumo(
+                    cantidad=cantidad,
+                    motivo=motivo,
+                    medicamento_id=prod_id,
+                    enfermero_id=1, # ID simulado
+                    paciente_id=paciente_id
+                )
+                db.session.add(nuevo_consumo)
+                db.session.commit()
+                flash(f'Salida registrada: {cantidad}x {producto.nombre}', 'success')
+            else:
+                flash(f'Error: Stock insuficiente de {producto.nombre} (Disponible: {producto.stock})', 'error')
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al registrar: {str(e)}', 'error')
+            
+        return redirect(url_for('consumo_insumos'))
+
+# --- RUTAS PORTAL CAPACITACIÓN (USUARIO) ---
+
+@app.route('/portal_capacitacion')
+def portal_capacitacion():
+    # 1. Simulación de usuario (Enfermero ID 1)
+    current_user_id = 1
+    enfermero = Enfermero.query.get(current_user_id)
+    
+    # 2. Obtener mis inscripciones (Activas e Históricas)
+    mis_inscripciones = Inscripcion.query.filter_by(enfermero_id=current_user_id).all()
+    
+    # Lista de IDs de cursos en los que ya estoy
+    mis_cursos_ids = [ins.curso_id for ins in mis_inscripciones]
+    
+    # 3. Obtener cursos disponibles (Los que NO están en mi lista)
+    # Usamos el operador ~ (not) con in_
+    cursos_disponibles = Curso.query.filter( ~Curso.id.in_(mis_cursos_ids) if mis_cursos_ids else True ).all()
+
+    return render_template('portal_capacitacion.html', 
+                           usuario=enfermero,
+                           mis_cursos=mis_inscripciones,
+                           oferta=cursos_disponibles)
+
+@app.route('/inscribirme_curso/<int:curso_id>')
+def inscribirme_curso(curso_id):
+    try:
+        # Usuario Simulado ID 1
+        nueva_inscripcion = Inscripcion(
+            enfermero_id=1,
+            curso_id=curso_id,
+            progreso=0,
+            calificacion=0.0,
+            estado='En Curso'
+        )
+        db.session.add(nueva_inscripcion)
+        db.session.commit()
+        flash('¡Inscripción exitosa! Puedes comenzar el curso ahora.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al inscribir: {str(e)}', 'error')
+        
+    return redirect(url_for('portal_capacitacion'))
+
+@app.route('/actualizar_progreso', methods=['POST'])
+def actualizar_progreso():
+    if request.method == 'POST':
+        try:
+            inscripcion_id = request.form['inscripcion_id']
+            nuevo_avance = int(request.form['nuevo_avance'])
+            
+            # Buscar registro
+            ins = Inscripcion.query.get(inscripcion_id)
+            
+            if ins:
+                ins.progreso = nuevo_avance
+                
+                # Si llega a 100%, marcamos como completado y simulamos calificación
+                if nuevo_avance >= 100:
+                    ins.estado = 'Completado'
+                    ins.calificacion = 95.0 # Calificación simulada automática
+                    flash('¡Felicidades! Has completado el curso.', 'success')
+                else:
+                    flash('Progreso guardado.', 'success')
+                    
+                db.session.commit()
+                
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'error')
+            
+    return redirect(url_for('portal_capacitacion'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # --- INICIALIZADOR ---

@@ -191,3 +191,87 @@ CREATE TABLE Tratamiento_Medicamento (
     FOREIGN KEY (tratamiento_id) REFERENCES Tratamiento(id),
     FOREIGN KEY (medicamento_id) REFERENCES Medicamento(id)
 );
+
+CREATE TABLE triage (
+    id SERIAL PRIMARY KEY,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    motivo_consulta TEXT,
+    
+    -- Signos Vitales
+    frecuencia_cardiaca INT,
+    saturacion_oxigeno INT,
+    temperatura DECIMAL(4,1),
+    tension_arterial VARCHAR(20),
+    escala_dolor INT,
+    glucosa INT,
+    
+    -- Clasificación
+    nivel_urgencia INT, -- 1 (Rojo) a 5 (Azul)
+    
+    -- Relación con Paciente
+    paciente_id INT,
+    CONSTRAINT fk_paciente_triage 
+      FOREIGN KEY(paciente_id) 
+      REFERENCES paciente(id)
+);
+
+-- Tabla Principal: Hoja diaria por paciente
+CREATE TABLE hoja_enfermeria (
+    id SERIAL PRIMARY KEY,
+    fecha DATE DEFAULT CURRENT_DATE,
+    paciente_id INT,
+    enfermero_id INT, -- Enfermero responsable del turno
+    CONSTRAINT fk_hoja_paciente FOREIGN KEY(paciente_id) REFERENCES paciente(id),
+    CONSTRAINT fk_hoja_enfermero FOREIGN KEY(enfermero_id) REFERENCES enfermero(id)
+);
+
+-- Tabla Detalle: Signos Vitales (Hora a hora)
+CREATE TABLE registro_vitales (
+    id SERIAL PRIMARY KEY,
+    hora TIME NOT NULL,
+    ta_sistolica INT,
+    ta_diastolica INT,
+    frecuencia_cardiaca INT,
+    frecuencia_respiratoria INT,
+    temperatura DECIMAL(4,1),
+    saturacion INT,
+    hoja_id INT,
+    CONSTRAINT fk_vitales_hoja FOREIGN KEY(hoja_id) REFERENCES hoja_enfermeria(id)
+);
+
+-- Tabla Detalle: Notas de Enfermería
+CREATE TABLE nota_enfermeria (
+    id SERIAL PRIMARY KEY,
+    hora TIME NOT NULL,
+    nota TEXT NOT NULL,
+    tipo VARCHAR(50), -- 'Ingreso', 'Procedimiento', 'Evolución', 'Indicación'
+    hoja_id INT,
+    CONSTRAINT fk_nota_hoja FOREIGN KEY(hoja_id) REFERENCES hoja_enfermeria(id)
+);
+
+-- Tabla Detalle: Administración de Medicamentos
+CREATE TABLE administracion_medicamento (
+    id SERIAL PRIMARY KEY,
+    hora TIME NOT NULL,
+    medicamento_nombre VARCHAR(150),
+    dosis VARCHAR(100),
+    via VARCHAR(50), -- Oral, IV, IM, etc.
+    observaciones TEXT,
+    hoja_id INT,
+    CONSTRAINT fk_med_hoja FOREIGN KEY(hoja_id) REFERENCES hoja_enfermeria(id)
+);
+CREATE TABLE historial_consumo (
+    id SERIAL PRIMARY KEY,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cantidad INT NOT NULL,
+    motivo VARCHAR(100), -- Ej: 'Curación', 'Procedimiento', 'Merma'
+    
+    -- Relaciones
+    medicamento_id INT, -- Referencia al producto (Medicamento o Material)
+    enfermero_id INT,   -- Quién lo usó
+    paciente_id INT,    -- (Opcional) A quién se lo aplicó
+    
+    CONSTRAINT fk_consumo_med FOREIGN KEY(medicamento_id) REFERENCES medicamento(id),
+    CONSTRAINT fk_consumo_enf FOREIGN KEY(enfermero_id) REFERENCES enfermero(id),
+    CONSTRAINT fk_consumo_pac FOREIGN KEY(paciente_id) REFERENCES paciente(id)
+);

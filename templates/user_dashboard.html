@@ -4,34 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Turno - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/nurse.css"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nurse.css') }}">
+</head>
 <body>
 
     <div class="main-layout">
         
         <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
+            <div class="brand"><h2>Nurstem</h2></div>
             <nav class="nav-menu">
-                <a href="user_dashboard.html" class="nav-link active">Mis Pacientes</a>
-                <a href="consumo_insumos.html" class="nav-link">Solicitar Insumos</a>
-                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
-                <a href="triage_ingreso.html" class="nav-link">Admisión Urgencias</a>
-                <div class="nav-separator"></div>
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link active">Mis Pacientes</a>
+                
+                <a href="{{ url_for('triage_ingreso') }}" class="nav-link">🚑 Admisión Urgencias</a>
+                
+                <a href="{{ url_for('consumo_insumos') }}" class="nav-link">💊 Insumos y Material</a>
+                <a href="{{ url_for('portal_capacitacion') }}" class="nav-link">🎓 Capacitación</a>
                 <a href="#" class="nav-link">Cerrar Turno</a>
             </nav>
             
             <div class="user-profile-widget">
-                <div class="avatar-circle">LE</div>
+                <div class="avatar-circle">
+                    {{ usuario.nombre[0] }}{{ usuario.apellidos[0] }}
+                </div>
                 <div class="profile-info">
-                    <span class="profile-name">Lula Enfermera</span>
-                    <span class="profile-role">Jefe de Pediatría</span>
+                    <span class="profile-name">{{ usuario.nombre }} {{ usuario.apellidos }}</span>
+                    <span class="profile-role">
+                        {{ usuario.rol.nombre if usuario.rol else 'Enfermería' }}
+                    </span>
                 </div>
             </div>
         </aside>
@@ -43,13 +45,25 @@
                 <div class="shift-header">
                     <div class="shift-info">
                         <h1>Tablero de Guardia</h1>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-top: 5px;">
+                            📅 {{ fecha_actual }}
+                        </p>
+                        
                         <div class="shift-badges">
-                            <span class="badge-pill badge-blue">Turno Matutino (08:00 - 19:00)</span>
-                            <span class="badge-pill badge-purple">Área Asignada: Piso 1 Pediatría</span>
+                            {% if area_actual != "Sin Asignación" %}
+                                <span class="badge-pill badge-blue">Turno: {{ turno_actual }}</span>
+                                <span class="badge-pill badge-purple">📍 {{ area_actual }}</span>
+                            {% else %}
+                                <span class="badge-pill" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">
+                                    ⚠️ No tienes asignación activa hoy
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="shift-actions">
-                        <button class="btn-secondary">📣 Reportar Incidencia</button>
+                        <button class="btn-secondary" onclick="alert('Notificación enviada a Jefatura')">
+                            📣 Reportar Incidencia
+                        </button>
                     </div>
                 </div>
 
@@ -57,106 +71,82 @@
                     <div class="task-card task-urgent">
                         <span class="task-icon">⏰</span>
                         <div class="task-text">
-                            <strong>Medicamentos</strong>
-                            <span>2 pendientes para las 12:00</span>
+                            <strong>Pendientes</strong>
+                            <span>Revisar indicaciones</span>
                         </div>
                     </div>
                     <div class="task-card">
-                        <span class="task-icon">💗</span>
+                        <span class="task-icon">👥</span>
                         <div class="task-text">
-                            <strong>Signos Vitales</strong>
-                            <span>Toma programada 14:00</span>
-                        </div>
-                    </div>
-                    <div class="task-card">
-                        <span class="task-icon">💧</span>
-                        <div class="task-text">
-                            <strong>Balances Hídricos</strong>
-                            <span>Al día</span>
+                            <strong>Carga de Trabajo</strong>
+                            <span>{{ pacientes|length }} Pacientes asignados</span>
                         </div>
                     </div>
                 </div>
 
-                <h3 class="section-title">Pacientes a mi cargo (4)</h3>
+                <h3 class="section-title">Pacientes a mi cargo ({{ pacientes|length }})</h3>
                 
                 <div class="patient-grid">
                     
+                    {% for paciente in pacientes %}
                     <div class="patient-card">
                         <div class="patient-header">
-                            <div class="bed-indicator">Cama 101</div>
+                            <div class="bed-indicator">ID: {{ paciente.id }}</div>
                             <span class="status-dot dot-stable" title="Estable"></span>
                         </div>
+                        
                         <div class="patient-body">
-                            <h4 class="patient-name">María Antonieta de las Nieves</h4>
-                            <p class="patient-dx">Dx: Neumonía adquirida en comunidad</p>
+                            <h4 class="patient-name">{{ paciente.nombre }} {{ paciente.apellidos }}</h4>
+                            
+                            <p class="patient-dx">
+                                <strong>Nacimiento:</strong> 
+                                {{ paciente.fecha_nacimiento if paciente.fecha_nacimiento else 'No registrado' }}
+                            </p>
                             
                             <div class="vitals-preview">
                                 <div class="vital-item">
-                                    <span class="label">Temp</span>
-                                    <span class="value">38.5°C</span>
+                                    <span class="label">Género</span>
+                                    <span class="value" style="font-size:0.9rem;">{{ paciente.genero }}</span>
                                 </div>
                                 <div class="vital-item">
-                                    <span class="label">SpO2</span>
-                                    <span class="value">92%</span>
+                                    <span class="label">Médico</span>
+                                    <span class="value" style="font-size:0.9rem;">
+                                        {{ paciente.medico.nombre if paciente.medico else 'General' }}
+                                    </span>
                                 </div>
                             </div>
 
                             <div class="alerts-container">
-                                <span class="alert-tag">Alergia: Penicilina</span>
+                                <span class="alert-tag" style="background:#f1f5f9; color:#475569;">
+                                    Ver Historial Clínico
+                                </span>
                             </div>
                         </div>
+                        
                         <div class="patient-actions">
-                            <a href="hoja_enfermeria.html" class="btn-action primary-action">Hoja de Enfermería</a>
-                            <button class="btn-action secondary-action">Ver Kardex</button>
+                            <a href="{{ url_for('hoja_view', paciente_id=paciente.id) }}" class="btn-action primary-action">Hoja de Enfermería</a>
+                            <button class="btn-action secondary-action">Kardex</button>
                         </div>
                     </div>
-
-                    <div class="patient-card">
-                        <div class="patient-header">
-                            <div class="bed-indicator">Cama 102</div>
-                            <span class="status-dot dot-warning" title="Atención Requerida"></span>
-                        </div>
-                        <div class="patient-body">
-                            <h4 class="patient-name">Roberto Gómez</h4>
-                            <p class="patient-dx">Dx: Post-operatorio Apendicectomía</p>
-                            
-                            <div class="vitals-preview">
-                                <div class="vital-item">
-                                    <span class="label">TA</span>
-                                    <span class="value">110/70</span>
-                                </div>
-                                <div class="vital-item">
-                                    <span class="label">Dolor</span>
-                                    <span class="value">7/10</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="patient-actions">
-                            <a href="hoja_enfermeria.html" class="btn-action primary-action">Hoja de Enfermería</a>
-                            <button class="btn-action secondary-action">Ver Kardex</button>
-                        </div>
+                    {% else %}
+                    <div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: white; border-radius: 12px; border: 2px dashed #cbd5e1;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🛏️</div>
+                        <h3 style="color: #64748b;">No hay pacientes visibles</h3>
+                        <p style="color: #94a3b8; max-width: 400px; margin: 0 auto;">
+                            Esto puede deberse a que no tienes una asignación de área para hoy, 
+                            o el área asignada ({{ area_actual }}) no tiene pacientes ingresados.
+                        </p>
+                        <br>
+                        <a href="{{ url_for('admin_asignaciones') }}" style="color:var(--color-primary); font-weight:bold;">
+                            Ir a Asignaciones (Admin)
+                        </a>
                     </div>
-
-                    <div class="patient-card card-discharge"> <div class="patient-header">
-                            <div class="bed-indicator">Cama 104</div>
-                            <span class="status-tag tag-success">Alta Médica</span>
-                        </div>
-                        <div class="patient-body">
-                            <h4 class="patient-name">Carlos Villagrán</h4>
-                            <p class="patient-dx">Dx: Gastroenteritis Aguda</p>
-                            <p class="discharge-note">Pendiente: Retirar vía y firmar egreso.</p>
-                        </div>
-                        <div class="patient-actions">
-                            <button class="btn-action success-action">Procesar Egreso</button>
-                        </div>
-                    </div>
+                    {% endfor %}
 
                 </div>
 
             </div>
-
         </main>
     </div>
-
 </body>
 </html>

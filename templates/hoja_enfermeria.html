@@ -4,253 +4,240 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hoja de Enfermería - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nurse.css') }}">
     
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/nurse.css"> <link rel="stylesheet" href="css/forms.css">  </head>
+    <style>
+        /* Estilos específicos para la hoja clínica */
+        .clinical-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px; /* Vitales | Notas | Meds */
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 80px);
+        }
+        .clinical-col {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .col-header {
+            background: #f8fafc;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .col-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .col-footer {
+            padding: 15px;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+        }
+        
+        /* Tabla Vitales Compacta */
+        .vitals-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .vitals-table th { text-align: left; color: #64748b; padding: 5px; border-bottom: 1px solid #eee; }
+        .vitals-table td { padding: 8px 5px; border-bottom: 1px solid #f1f5f9; }
+        
+        /* Timeline Notas */
+        .note-item { 
+            border-left: 3px solid #3b82f6; 
+            padding-left: 15px; 
+            margin-bottom: 20px; 
+            position: relative;
+        }
+        .note-time { font-size: 0.75rem; color: #94a3b8; font-weight: bold; }
+        .note-type { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 5px;}
+        .note-text { font-size: 0.9rem; color: #334155; line-height: 1.4; }
+
+        /* Tarjeta Medicamento */
+        .med-card {
+            background: #fdfdfd;
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #10b981;
+        }
+        
+        .header-patient-info {
+            background: #1e293b;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
 <body>
 
-    <div class="main-layout">
+    <div class="main-layout" style="grid-template-columns: 1fr;">
         
-        <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
-            <nav class="nav-menu">
-                <a href="user_dashboard.html" class="nav-link">Mis Pacientes</a>
-                <a href="consumo_insumos.html" class="nav-link">Solicitar Insumos</a>
-                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
-                <a href="triage_ingreso.html" class="nav-link">Admisión Urgencias</a>
-                <div class="nav-separator"></div>
-                <a href="#" class="nav-link">Cerrar Turno</a>
-            </nav>
-        </aside>
-
-        <main class="content-area" style="padding: 0;">
-            
-            <div class="patient-banner">
-                <div class="banner-left">
-                    <a href="user_dashboard.html" class="btn-back">← Volver</a>
-                    <div class="patient-identity">
-                        <h2>María Antonieta de las Nieves</h2>
-                        <span class="patient-sub">75 Años • Femenino • Exp: 899012</span>
-                    </div>
-                </div>
-                <div class="banner-right">
-                    <div class="info-pill">
-                        <span class="pill-label">Cama</span>
-                        <span class="pill-value">101</span>
-                    </div>
-                    <div class="info-pill pill-alert">
-                        <span class="pill-label">Alergias</span>
-                        <span class="pill-value">PENICILINA</span>
-                    </div>
+        <div class="header-patient-info">
+            <div style="display:flex; gap:15px; align-items:center;">
+                <a href="{{ url_for('user_dashboard') }}" style="color:white; text-decoration:none; font-size:1.2rem;">&larr;</a>
+                <div>
+                    <h2 style="margin:0; font-size:1.1rem;">{{ paciente.nombre }} {{ paciente.apellidos }}</h2>
+                    <span style="font-size:0.85rem; opacity:0.8;">
+                        ID: {{ paciente.id }} | Edad: Calculando... | Cama: {{ paciente.area.nombre }}
+                    </span>
                 </div>
             </div>
+            <div>
+                <span class="badge-pill badge-blue">{{ now.strftime('%d %b %Y') }}</span>
+                <span class="badge-pill">Turno Actual</span>
+            </div>
+        </div>
 
-            <div class="form-container">
-                <form action="#" method="POST">
-                    
-                    <div class="form-header-row">
-                        <h3>Registro Clínico - Turno Matutino</h3>
-                        <span class="timestamp">Hora de registro: 09:30 AM</span>
-                    </div>
+        <div class="clinical-layout">
 
-                    <section class="clinical-card">
-                        <h4 class="card-title">🩺 Signos Vitales</h4>
-                        <div class="vitals-grid">
-                            
-                            <div class="input-wrapper">
-                                <label>T. Arterial (mmHg)</label>
-                                <div class="input-group-merged">
-                                    <input type="number" placeholder="120" class="input-clinical">
-                                    <span class="separator">/</span>
-                                    <input type="number" placeholder="80" class="input-clinical">
-                                </div>
-                            </div>
-
-                            <div class="input-wrapper">
-                                <label>Frec. Cardíaca (lpm)</label>
-                                <input type="number" class="input-clinical" placeholder="80">
-                            </div>
-
-                            <div class="input-wrapper">
-                                <label>Frec. Respiratoria (rpm)</label>
-                                <input type="number" class="input-clinical" placeholder="18">
-                            </div>
-
-                            <div class="input-wrapper">
-                                <label>Temperatura (°C)</label>
-                                <input type="number" step="0.1" class="input-clinical" placeholder="36.5">
-                            </div>
-
-                            <div class="input-wrapper">
-                                <label>Saturación O2 (%)</label>
-                                <input type="number" class="input-clinical" placeholder="95">
-                            </div>
-
-                            <div class="input-wrapper">
-                                <label>Glucosa Capilar (mg/dL)</label>
-                                <input type="number" class="input-clinical highlight-input" placeholder="---">
-                            </div>
-                            
-                            <div class="input-wrapper">
-                                <label>Escala Dolor (EVA)</label>
-                                <select class="input-clinical">
-                                    <option value="0">0 - Sin Dolor</option>
-                                    <option value="2">2 - Leve</option>
-                                    <option value="5">5 - Moderado</option>
-                                    <option value="8">8 - Intenso</option>
-                                    <option value="10">10 - Insoportable</option>
-                                </select>
-                            </div>
-
-                            <div class="input-wrapper">
-                                <label>Estado Neurológico</label>
-                                <select class="input-clinical">
-                                    <option>Alerta</option>
-                                    <option>Somnoliento</option>
-                                    <option>Estuporoso</option>
-                                    <option>Coma</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="clinical-card">
-                        <h4 class="card-title">💊 Administración de Medicamentos</h4>
-                        <div class="meds-list">
-                            
-                            <div class="med-item">
-                                <div class="med-info">
-                                    <span class="med-time">08:00 AM</span>
-                                    <div class="med-details">
-                                        <strong>Omeprazol 40mg IV</strong>
-                                        <small>Protector Gástrico</small>
-                                    </div>
-                                </div>
-                                <div class="med-action">
-                                    <input type="checkbox" id="med1" class="med-checkbox">
-                                    <label for="med1" class="btn-check">Administrar</label>
-                                </div>
-                            </div>
-
-                            <div class="med-item">
-                                <div class="med-info">
-                                    <span class="med-time">08:00 AM</span>
-                                    <div class="med-details">
-                                        <strong>Ceftriaxona 1g IV</strong>
-                                        <small>Antibiótico (Diluir en 100ml Sol. Salina)</small>
-                                    </div>
-                                </div>
-                                <div class="med-action">
-                                    <input type="checkbox" id="med2" class="med-checkbox">
-                                    <label for="med2" class="btn-check">Administrar</label>
-                                </div>
-                            </div>
-
-                            <div class="med-item item-future">
-                                <div class="med-info">
-                                    <span class="med-time">14:00 PM</span>
-                                    <div class="med-details">
-                                        <strong>Paracetamol 1g IV</strong>
-                                        <small>Analgésico / Antipirético</small>
-                                    </div>
-                                </div>
-                                <div class="med-action">
-                                    <span class="status-pending">Programado</span>
-                                </div>
-                            </div>
-
-                        </div>
-                    </section>
-
-                    <section class="clinical-card">
-                        <h4 class="card-title">💧 Balance de Líquidos (Turno Actual)</h4>
+            <div class="clinical-col">
+                <div class="col-header">
+                    Signos Vitales
+                    <small>Último: Hace instantes</small>
+                </div>
+                <div class="col-body">
+                    <table class="vitals-table">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>T/A</th>
+                                <th>FC</th>
+                                <th>T°</th>
+                                <th>SpO2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in hoja.vitales|sort(attribute='hora', reverse=True) %}
+                            <tr>
+                                <td><strong>{{ v.hora.strftime('%H:%M') }}</strong></td>
+                                <td>{{ v.ta_sistolica }}/{{ v.ta_diastolica }}</td>
+                                <td>{{ v.frecuencia_cardiaca }}</td>
+                                <td>{{ v.temperatura }}</td>
+                                <td style="color: {{ 'red' if v.saturacion < 90 else 'green' }}">{{ v.saturacion }}%</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" style="text-align:center; padding:10px;">Sin registros hoy</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-footer">
+                    <form action="{{ url_for('guardar_registro_clinico') }}" method="POST">
+                        <input type="hidden" name="tipo_registro" value="vitales">
+                        <input type="hidden" name="hoja_id" value="{{ hoja.id }}">
+                        <input type="hidden" name="paciente_id" value="{{ paciente.id }}">
                         
-                        <div class="balance-container">
-                            <div class="balance-column col-in">
-                                <h5>Ingresos (ml)</h5>
-                                <div class="input-row">
-                                    <label>Sol. Parenterales</label>
-                                    <input type="number" class="input-small" id="inputParenteral" onchange="calcBalance()">
-                                </div>
-                                <div class="input-row">
-                                    <label>Vía Oral / Sonda</label>
-                                    <input type="number" class="input-small" id="inputOral" onchange="calcBalance()">
-                                </div>
-                                <div class="input-row">
-                                    <label>Medicamentos / Diluciones</label>
-                                    <input type="number" class="input-small" id="inputMeds" onchange="calcBalance()">
-                                </div>
-                            </div>
-
-                            <div class="balance-column col-out">
-                                <h5>Egresos (ml)</h5>
-                                <div class="input-row">
-                                    <label>Uresis (Orina)</label>
-                                    <input type="number" class="input-small" id="outputUrine" onchange="calcBalance()">
-                                </div>
-                                <div class="input-row">
-                                    <label>Evacuaciones</label>
-                                    <input type="number" class="input-small" id="outputStool" onchange="calcBalance()">
-                                </div>
-                                <div class="input-row">
-                                    <label>Vómito / Drenajes</label>
-                                    <input type="number" class="input-small" id="outputEmesis" onchange="calcBalance()">
-                                </div>
-                            </div>
-
-                            <div class="balance-total">
-                                <span>Balance Turno:</span>
-                                <strong id="totalBalance">0 ml</strong>
-                            </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:5px;">
+                            <input type="number" name="ta_sys" placeholder="SYS" class="form-input" required style="font-size:0.8rem;">
+                            <input type="number" name="ta_dia" placeholder="DIA" class="form-input" required style="font-size:0.8rem;">
                         </div>
-                    </section>
-
-                    <section class="clinical-card">
-                        <h4 class="card-title">📝 Notas de Enfermería</h4>
-                        <textarea class="note-area" rows="4" placeholder="Escriba aquí las observaciones relevantes sobre la evolución del paciente, incidentes o cuidados especiales realizados..."></textarea>
-                    </section>
-
-                    <div class="form-actions-bar">
-                        <button type="button" class="btn-secondary">Guardar Borrador</button>
-                        <button type="submit" class="btn-primary btn-large">Firmar y Guardar Registro</button>
-                    </div>
-
-                </form>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                            <input type="number" name="fc" placeholder="FC" class="form-input" required style="font-size:0.8rem;">
+                            <input type="number" name="temp" placeholder="°C" class="form-input" step="0.1" required style="font-size:0.8rem;">
+                            <input type="number" name="spo2" placeholder="Sat%" class="form-input" required style="font-size:0.8rem;">
+                        </div>
+                        <input type="hidden" name="fr" value="18"> <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Registrar Signos</button>
+                    </form>
+                </div>
             </div>
 
-        </main>
+            <div class="clinical-col">
+                <div class="col-header">Notas de Evolución</div>
+                <div class="col-body">
+                    {% for n in hoja.notas|sort(attribute='hora', reverse=True) %}
+                    <div class="note-item">
+                        <div class="note-time">{{ n.hora.strftime('%H:%M') }}</div>
+                        <span class="note-type">{{ n.tipo }}</span>
+                        <div class="note-text">{{ n.nota }}</div>
+                    </div>
+                    {% else %}
+                    <p style="text-align:center; color:#ccc;">No hay notas registradas.</p>
+                    {% endfor %}
+                </div>
+                <div class="col-footer">
+                    <form action="{{ url_for('guardar_registro_clinico') }}" method="POST">
+                        <input type="hidden" name="tipo_registro" value="nota">
+                        <input type="hidden" name="hoja_id" value="{{ hoja.id }}">
+                        <input type="hidden" name="paciente_id" value="{{ paciente.id }}">
+                        
+                        <select name="tipo_nota" class="form-select" style="margin-bottom:5px;">
+                            <option value="Evolución">Evolución General</option>
+                            <option value="Procedimiento">Procedimiento</option>
+                            <option value="Ingreso">Nota de Ingreso</option>
+                            <option value="Indicación">Indicación Médica</option>
+                        </select>
+                        <textarea name="nota_texto" class="form-input" rows="2" placeholder="Escriba la nota aquí..." required></textarea>
+                        <button type="submit" class="btn-primary" style="width:100%; margin-top:5px;">Guardar Nota</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="clinical-col">
+                <div class="col-header">Administración</div>
+                <div class="col-body">
+                    {% for m in hoja.medicamentos_admin|sort(attribute='hora', reverse=True) %}
+                    <div class="med-card">
+                        <div style="font-weight:bold; font-size:0.9rem;">{{ m.medicamento_nombre }}</div>
+                        <div style="font-size:0.8rem; color:#64748b;">
+                            {{ m.dosis }} ({{ m.via }}) - {{ m.hora.strftime('%H:%M') }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="col-footer">
+                    <form action="{{ url_for('guardar_registro_clinico') }}" method="POST">
+                        <input type="hidden" name="tipo_registro" value="medicamento">
+                        <input type="hidden" name="hoja_id" value="{{ hoja.id }}">
+                        <input type="hidden" name="paciente_id" value="{{ paciente.id }}">
+                        
+                        <label style="font-size:0.8rem; font-weight:600;">Medicamento:</label>
+                        <select name="nombre_med_select" class="form-select" style="margin-bottom:5px;">
+                            <option value="">-- Seleccionar --</option>
+                            {% for farmaco in medicamentos %}
+                                <option value="{{ farmaco.nombre }}">{{ farmaco.nombre }} (Stock: {{ farmaco.stock }})</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" name="nombre_med_text" placeholder="O escribir manual..." class="form-input" style="margin-bottom:5px; font-size:0.8rem;">
+                        
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                            <input type="text" name="dosis" placeholder="Dosis" class="form-input" required style="font-size:0.8rem;">
+                            <input type="text" name="via" placeholder="Vía (IV/VO)" class="form-input" required style="font-size:0.8rem;">
+                        </div>
+                        <input type="text" name="obs_med" placeholder="Observaciones" class="form-input" style="margin-top:5px; font-size:0.8rem;">
+                        
+                        <button type="submit" class="btn-primary" style="width:100%; margin-top:10px; background-color:#10b981; border:none;">Administrar</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
     </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="position:fixed; bottom:20px; right:20px; z-index:100;">
+            {% for category, message in messages %}
+                <div style="background: #333; color: white; padding: 10px 20px; border-radius: 5px; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
-    <script>
-        function calcBalance() {
-            // Ingresos
-            let i1 = Number(document.getElementById('inputParenteral').value) || 0;
-            let i2 = Number(document.getElementById('inputOral').value) || 0;
-            let i3 = Number(document.getElementById('inputMeds').value) || 0;
-            let totalIn = i1 + i2 + i3;
-
-            // Egresos
-            let e1 = Number(document.getElementById('outputUrine').value) || 0;
-            let e2 = Number(document.getElementById('outputStool').value) || 0;
-            let e3 = Number(document.getElementById('outputEmesis').value) || 0;
-            let totalOut = e1 + e2 + e3;
-
-            // Balance
-            let balance = totalIn - totalOut;
-            const display = document.getElementById('totalBalance');
-            
-            display.innerText = (balance > 0 ? "+" : "") + balance + " ml";
-            
-            // Colores dinámicos
-            if(balance > 0) display.style.color = "#166534"; // Verde
-            else if(balance < 0) display.style.color = "#b91c1c"; // Rojo
-            else display.style.color = "#334155";
-        }
-    </script>
 </body>
 </html>

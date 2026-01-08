@@ -3,188 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Consumo - Nurstem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Consumo de Insumos - Nurstem</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nurse.css') }}">
     
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/nurse.css"> <link rel="stylesheet" href="css/consumption.css"> </head>
+    <style>
+        .consumo-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 60px);
+        }
+        
+        /* Panel Izquierdo: Selección */
+        .selection-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .insumo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            padding: 10px 0;
+            margin-top: 15px;
+        }
+        
+        .insumo-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            background: #f8fafc;
+            position: relative;
+        }
+        
+        .insumo-card:hover { border-color: #3b82f6; background: #eff6ff; transform: translateY(-2px); }
+        .insumo-card.selected { border-color: #2563eb; background: #dbeafe; ring: 2px solid #2563eb; }
+        
+        .stock-badge-mini {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e2e8f0;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        .stock-low { background: #fee2e2; color: #991b1b; }
+
+        /* Panel Derecho: Formulario */
+        .action-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-left: 4px solid #f59e0b; /* Color naranja distintivo */
+        }
+        
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+        .history-item {
+            font-size: 0.85rem;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        /* Input numérico grande */
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .qty-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid #cbd5e1;
+            background: white; font-size: 1.2rem; cursor: pointer;
+        }
+        .qty-input {
+            width: 60px; height: 40px; text-align: center; font-size: 1.2rem;
+            border: 1px solid #cbd5e1; border-radius: 6px;
+        }
+    </style>
+</head>
 <body>
 
-    <div class="main-layout">
-        
-        <aside class="sidebar">
-            <div class="brand">
-                <h2>Nurstem</h2>
-            </div>
-            <nav class="nav-menu">
-                <a href="user_dashboard.html" class="nav-link">Mis Pacientes</a>
-                <a href="consumo_insumos.html" class="nav-link active">Solicitar Insumos</a>
-                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
-                <a href="triage_ingreso.html" class="nav-link">Admisión Urgencias</a>
-                <div class="nav-separator"></div>
-                <a href="#" class="nav-link">Cerrar Turno</a>
-            </nav>
-            
-            <div class="user-profile-widget">
-                <div class="avatar-circle">LE</div>
-                <div class="profile-info">
-                    <span class="profile-name">Lula Enfermera</span>
-                    <span class="profile-role">Jefe de Pediatría</span>
-                </div>
-            </div>
+    <div class="main-layout" style="grid-template-columns: 80px 1fr;">
+        <aside style="background: #1e293b; display: flex; flex-direction: column; align-items: center; padding-top: 20px;">
+            <a href="{{ url_for('user_dashboard') }}" style="color: white; font-size: 1.5rem; margin-bottom: 30px; text-decoration: none;" title="Volver">🏠</a>
+            <a href="{{ url_for('consumo_insumos') }}" style="color: #38bdf8; font-size: 1.5rem; margin-bottom: 30px;" title="Recargar">🔄</a>
         </aside>
 
-        <main class="content-area clean-padding">
+        <main style="background: #f1f5f9;">
             
-            <div class="pos-layout">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="background: #333; color: white; padding: 10px; text-align: center;">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="consumo-container">
                 
-                <section class="catalog-section">
+                <div class="selection-panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>Solicitud de Material</h2>
+                        <span class="badge-pill badge-purple">📍 {{ area_actual }}</span>
+                    </div>
                     
-                    <div class="catalog-header">
-                        <div class="location-badge">
-                            <span class="dot"></span>
-                            Ubicación: Isla Pediatría (Piso 1)
+                    <input type="text" id="searchBox" class="form-input" placeholder="Buscar material..." onkeyup="filterProducts()" style="margin-top:10px;">
+
+                    <div class="insumo-grid">
+                        {% for item in insumos %}
+                        <div class="insumo-card" onclick="selectProduct('{{ item.id }}', '{{ item.nombre }}', {{ item.stock }})">
+                            <span class="stock-badge-mini {% if item.stock < 10 %}stock-low{% endif %}">{{ item.stock }} u.</span>
+                            <div style="font-size: 2rem; margin-bottom: 5px;">
+                                {% if item.tipo == 'Solucion' %}💧{% else %}🩹{% endif %}
+                            </div>
+                            <div style="font-weight: 600; font-size: 0.9rem; line-height: 1.2;">{{ item.nombre }}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px;">{{ item.presentacion }}</div>
+                            <span style="display:none;">{{ item.nombre|lower }}</span>
                         </div>
-                        <h1>Tomar Insumos / Medicamentos</h1>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="action-panel">
+                    <h3 style="color: #d97706;">Registrar Salida</h3>
+                    
+                    <form action="{{ url_for('registrar_consumo_rapido') }}" method="POST">
+                        <input type="hidden" name="producto_id" id="selectedProdId" required>
                         
-                        <div class="search-wrapper">
-                            <input type="text" class="big-search" placeholder="🔍 Escanear código o buscar producto...">
+                        <div style="background: #fffbeb; padding: 15px; border-radius: 8px; border: 1px solid #fcd34d; margin-bottom: 15px; text-align: center;">
+                            <span style="display:block; font-size: 0.8rem; color: #92400e;">Producto Seleccionado:</span>
+                            <strong id="selectedProdName" style="font-size: 1.1rem; color: #b45309;">-- Ninguno --</strong>
+                            <small id="stockDisplay" style="display:block; color:#78350f;"></small>
                         </div>
 
-                        <div class="quick-filters">
-                            <button class="filter-chip active">Todo</button>
-                            <button class="filter-chip">💊 Medicamentos</button>
-                            <button class="filter-chip">💉 Material Curación</button>
-                            <button class="filter-chip">🧴 Soluciones</button>
-                        </div>
-                    </div>
-
-                    <div class="products-grid">
-                        
-                        <div class="product-card" onclick="addToCart('Paracetamol 500mg', 'Tabs')">
-                            <div class="stock-indicator stock-ok">Stock: 45</div>
-                            <div class="product-icon">💊</div>
-                            <div class="product-details">
-                                <h4>Paracetamol 500mg</h4>
-                                <p>Caja / Tabletas</p>
-                            </div>
-                            <button class="btn-add">+</button>
-                        </div>
-
-                        <div class="product-card" onclick="addToCart('Jeringa 5ml', 'Pza')">
-                            <div class="stock-indicator stock-ok">Stock: 120</div>
-                            <div class="product-icon">💉</div>
-                            <div class="product-details">
-                                <h4>Jeringa 5ml</h4>
-                                <p>Material Estéril</p>
-                            </div>
-                            <button class="btn-add">+</button>
-                        </div>
-
-                        <div class="product-card card-low-stock" onclick="addToCart('Gasas Estériles', 'Paq')">
-                            <div class="stock-indicator stock-warning">Stock: 5</div>
-                            <div class="product-icon">🩹</div>
-                            <div class="product-details">
-                                <h4>Gasas Estériles 10x10</h4>
-                                <p>Paquete Individual</p>
-                            </div>
-                            <button class="btn-add">+</button>
-                        </div>
-
-                        <div class="product-card" onclick="addToCart('Sol. Salina 0.9%', 'Bolsa')">
-                            <div class="stock-indicator stock-ok">Stock: 15</div>
-                            <div class="product-icon">💧</div>
-                            <div class="product-details">
-                                <h4>Sol. Salina 0.9%</h4>
-                                <p>Bolsa 500ml</p>
-                            </div>
-                            <button class="btn-add">+</button>
-                        </div>
-
-                        <div class="product-card" onclick="addToCart('Ketorolaco 30mg', 'Amp')">
-                            <div class="stock-indicator stock-ok">Stock: 20</div>
-                            <div class="product-icon">💊</div>
-                            <div class="product-details">
-                                <h4>Ketorolaco 30mg</h4>
-                                <p>Ampolleta</p>
-                            </div>
-                            <button class="btn-add">+</button>
-                        </div>
-
-                        <div class="product-card" onclick="addToCart('Guantes Latex M', 'Par')">
-                            <div class="stock-indicator stock-ok">Stock: 200</div>
-                            <div class="product-icon">🧤</div>
-                            <div class="product-details">
-                                <h4>Guantes Latex (M)</h4>
-                                <p>Par Estéril</p>
-                            </div>
-                            <button class="btn-add">+</button>
-                        </div>
-
-                    </div>
-                </section>
-
-                <aside class="cart-panel">
-                    <div class="cart-header">
-                        <h3>Lista de Retiro</h3>
-                        <span class="cart-count" id="cartCount">2 items</span>
-                    </div>
-
-                    <div class="cart-items-container">
-                        
-                        <div class="cart-item">
-                            <div class="cart-item-info">
-                                <strong>Paracetamol 500mg</strong>
-                                <small>Tabs</small>
-                            </div>
-                            <div class="qty-control">
-                                <button class="btn-qty">-</button>
-                                <input type="number" value="2" readonly>
-                                <button class="btn-qty">+</button>
-                            </div>
-                            <button class="btn-remove">×</button>
-                        </div>
-
-                        <div class="cart-item">
-                            <div class="cart-item-info">
-                                <strong>Jeringa 5ml</strong>
-                                <small>Pza</small>
-                            </div>
-                            <div class="qty-control">
-                                <button class="btn-qty">-</button>
-                                <input type="number" value="1" readonly>
-                                <button class="btn-qty">+</button>
-                            </div>
-                            <button class="btn-remove">×</button>
-                        </div>
-
-                    </div>
-
-                    <div class="cart-footer">
-                        <div class="assignment-selector">
-                            <label>Asignar a Paciente (Opcional)</label>
-                            <select class="form-select">
-                                <option value="">-- Uso General / Stock Carrito --</option>
-                                <option value="1">Cama 101 - María Antonieta</option>
-                                <option value="2">Cama 102 - Roberto Gómez</option>
+                        <div class="form-group">
+                            <label>Paciente (Opcional)</label>
+                            <select name="paciente_id" class="form-select">
+                                <option value="">-- Uso General / Stock de Carro --</option>
+                                {% for p in pacientes %}
+                                    <option value="{{ p.id }}">{{ p.nombre }} {{ p.apellidos }}</option>
+                                {% endfor %}
                             </select>
                         </div>
-                        <button class="btn-checkout">Confirmar Retiro</button>
+
+                        <div class="qty-selector">
+                            <button type="button" class="qty-btn" onclick="adjustQty(-1)">-</button>
+                            <input type="number" name="cantidad" id="qtyInput" class="qty-input" value="1" min="1" max="50">
+                            <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Motivo</label>
+                            <select name="motivo" class="form-select">
+                                <option value="Curación">Curación / Procedimiento</option>
+                                <option value="Medicamento">Dilución Medicamento</option>
+                                <option value="Higiene">Higiene / Confort</option>
+                                <option value="Reposicion">Reposición Stock</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Confirmar Descuento</button>
+                    </form>
+
+                    <h4 style="margin-top: 20px; color: #64748b;">Historial Reciente</h4>
+                    <div class="history-list">
+                        {% for h in historial %}
+                        <div class="history-item">
+                            <strong>{{ h.producto.nombre }}</strong> (x{{ h.cantidad }})
+                            <br>
+                            <span style="font-size:0.7rem;">{{ h.fecha_hora.strftime('%H:%M') }} - {{ h.motivo }}</span>
+                        </div>
+                        {% else %}
+                        <p style="text-align:center; color:#ccc; font-size:0.8rem;">Sin movimientos hoy</p>
+                        {% endfor %}
                     </div>
-                </aside>
+                </div>
 
             </div>
-
         </main>
     </div>
 
     <script>
-        // Script simple para simular interacción UI
-        function addToCart(name, type) {
-            // Aquí iría la lógica para agregar al DOM del carrito
-            alert(`Producto agregado: ${name}`);
+        function selectProduct(id, name, stock) {
+            document.getElementById('selectedProdId').value = id;
+            document.getElementById('selectedProdName').innerText = name;
+            document.getElementById('stockDisplay').innerText = "Disponible: " + stock;
+            
+            // Resaltar visualmente
+            document.querySelectorAll('.insumo-card').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+
+        function adjustQty(amount) {
+            const input = document.getElementById('qtyInput');
+            let val = parseInt(input.value) + amount;
+            if (val < 1) val = 1;
+            input.value = val;
+        }
+
+        function filterProducts() {
+            const term = document.getElementById('searchBox').value.toLowerCase();
+            const cards = document.querySelectorAll('.insumo-card');
+            
+            cards.forEach(card => {
+                const name = card.querySelector('span[style="display:none;"]').innerText;
+                if (name.includes(term)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
     </script>
 </body>

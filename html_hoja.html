@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja de Enfermería - Nurstem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/nurse.css"> <link rel="stylesheet" href="css/forms.css">  </head>
+<body>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>Nurstem</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="user_dashboard.html" class="nav-link">Mis Pacientes</a>
+                <a href="consumo_insumos.html" class="nav-link">Solicitar Insumos</a>
+                <a href="portal_capacitacion.html" class="nav-link">Mi Capacitación</a>
+                <a href="triage_ingreso.html" class="nav-link">Admisión Urgencias</a>
+                <div class="nav-separator"></div>
+                <a href="#" class="nav-link">Cerrar Turno</a>
+            </nav>
+        </aside>
+
+        <main class="content-area" style="padding: 0;">
+            
+            <div class="patient-banner">
+                <div class="banner-left">
+                    <a href="user_dashboard.html" class="btn-back">← Volver</a>
+                    <div class="patient-identity">
+                        <h2>María Antonieta de las Nieves</h2>
+                        <span class="patient-sub">75 Años • Femenino • Exp: 899012</span>
+                    </div>
+                </div>
+                <div class="banner-right">
+                    <div class="info-pill">
+                        <span class="pill-label">Cama</span>
+                        <span class="pill-value">101</span>
+                    </div>
+                    <div class="info-pill pill-alert">
+                        <span class="pill-label">Alergias</span>
+                        <span class="pill-value">PENICILINA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <form action="#" method="POST">
+                    
+                    <div class="form-header-row">
+                        <h3>Registro Clínico - Turno Matutino</h3>
+                        <span class="timestamp">Hora de registro: 09:30 AM</span>
+                    </div>
+
+                    <section class="clinical-card">
+                        <h4 class="card-title">🩺 Signos Vitales</h4>
+                        <div class="vitals-grid">
+                            
+                            <div class="input-wrapper">
+                                <label>T. Arterial (mmHg)</label>
+                                <div class="input-group-merged">
+                                    <input type="number" placeholder="120" class="input-clinical">
+                                    <span class="separator">/</span>
+                                    <input type="number" placeholder="80" class="input-clinical">
+                                </div>
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Frec. Cardíaca (lpm)</label>
+                                <input type="number" class="input-clinical" placeholder="80">
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Frec. Respiratoria (rpm)</label>
+                                <input type="number" class="input-clinical" placeholder="18">
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Temperatura (°C)</label>
+                                <input type="number" step="0.1" class="input-clinical" placeholder="36.5">
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Saturación O2 (%)</label>
+                                <input type="number" class="input-clinical" placeholder="95">
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Glucosa Capilar (mg/dL)</label>
+                                <input type="number" class="input-clinical highlight-input" placeholder="---">
+                            </div>
+                            
+                            <div class="input-wrapper">
+                                <label>Escala Dolor (EVA)</label>
+                                <select class="input-clinical">
+                                    <option value="0">0 - Sin Dolor</option>
+                                    <option value="2">2 - Leve</option>
+                                    <option value="5">5 - Moderado</option>
+                                    <option value="8">8 - Intenso</option>
+                                    <option value="10">10 - Insoportable</option>
+                                </select>
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Estado Neurológico</label>
+                                <select class="input-clinical">
+                                    <option>Alerta</option>
+                                    <option>Somnoliento</option>
+                                    <option>Estuporoso</option>
+                                    <option>Coma</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="clinical-card">
+                        <h4 class="card-title">💊 Administración de Medicamentos</h4>
+                        <div class="meds-list">
+                            
+                            <div class="med-item">
+                                <div class="med-info">
+                                    <span class="med-time">08:00 AM</span>
+                                    <div class="med-details">
+                                        <strong>Omeprazol 40mg IV</strong>
+                                        <small>Protector Gástrico</small>
+                                    </div>
+                                </div>
+                                <div class="med-action">
+                                    <input type="checkbox" id="med1" class="med-checkbox">
+                                    <label for="med1" class="btn-check">Administrar</label>
+                                </div>
+                            </div>
+
+                            <div class="med-item">
+                                <div class="med-info">
+                                    <span class="med-time">08:00 AM</span>
+                                    <div class="med-details">
+                                        <strong>Ceftriaxona 1g IV</strong>
+                                        <small>Antibiótico (Diluir en 100ml Sol. Salina)</small>
+                                    </div>
+                                </div>
+                                <div class="med-action">
+                                    <input type="checkbox" id="med2" class="med-checkbox">
+                                    <label for="med2" class="btn-check">Administrar</label>
+                                </div>
+                            </div>
+
+                            <div class="med-item item-future">
+                                <div class="med-info">
+                                    <span class="med-time">14:00 PM</span>
+                                    <div class="med-details">
+                                        <strong>Paracetamol 1g IV</strong>
+                                        <small>Analgésico / Antipirético</small>
+                                    </div>
+                                </div>
+                                <div class="med-action">
+                                    <span class="status-pending">Programado</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <section class="clinical-card">
+                        <h4 class="card-title">💧 Balance de Líquidos (Turno Actual)</h4>
+                        
+                        <div class="balance-container">
+                            <div class="balance-column col-in">
+                                <h5>Ingresos (ml)</h5>
+                                <div class="input-row">
+                                    <label>Sol. Parenterales</label>
+                                    <input type="number" class="input-small" id="inputParenteral" onchange="calcBalance()">
+                                </div>
+                                <div class="input-row">
+                                    <label>Vía Oral / Sonda</label>
+                                    <input type="number" class="input-small" id="inputOral" onchange="calcBalance()">
+                                </div>
+                                <div class="input-row">
+                                    <label>Medicamentos / Diluciones</label>
+                                    <input type="number" class="input-small" id="inputMeds" onchange="calcBalance()">
+                                </div>
+                            </div>
+
+                            <div class="balance-column col-out">
+                                <h5>Egresos (ml)</h5>
+                                <div class="input-row">
+                                    <label>Uresis (Orina)</label>
+                                    <input type="number" class="input-small" id="outputUrine" onchange="calcBalance()">
+                                </div>
+                                <div class="input-row">
+                                    <label>Evacuaciones</label>
+                                    <input type="number" class="input-small" id="outputStool" onchange="calcBalance()">
+                                </div>
+                                <div class="input-row">
+                                    <label>Vómito / Drenajes</label>
+                                    <input type="number" class="input-small" id="outputEmesis" onchange="calcBalance()">
+                                </div>
+                            </div>
+
+                            <div class="balance-total">
+                                <span>Balance Turno:</span>
+                                <strong id="totalBalance">0 ml</strong>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="clinical-card">
+                        <h4 class="card-title">📝 Notas de Enfermería</h4>
+                        <textarea class="note-area" rows="4" placeholder="Escriba aquí las observaciones relevantes sobre la evolución del paciente, incidentes o cuidados especiales realizados..."></textarea>
+                    </section>
+
+                    <div class="form-actions-bar">
+                        <button type="button" class="btn-secondary">Guardar Borrador</button>
+                        <button type="submit" class="btn-primary btn-large">Firmar y Guardar Registro</button>
+                    </div>
+
+                </form>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function calcBalance() {
+            // Ingresos
+            let i1 = Number(document.getElementById('inputParenteral').value) || 0;
+            let i2 = Number(document.getElementById('inputOral').value) || 0;
+            let i3 = Number(document.getElementById('inputMeds').value) || 0;
+            let totalIn = i1 + i2 + i3;
+
+            // Egresos
+            let e1 = Number(document.getElementById('outputUrine').value) || 0;
+            let e2 = Number(document.getElementById('outputStool').value) || 0;
+            let e3 = Number(document.getElementById('outputEmesis').value) || 0;
+            let totalOut = e1 + e2 + e3;
+
+            // Balance
+            let balance = totalIn - totalOut;
+            const display = document.getElementById('totalBalance');
+            
+            display.innerText = (balance > 0 ? "+" : "") + balance + " ml";
+            
+            // Colores dinámicos
+            if(balance > 0) display.style.color = "#166534"; // Verde
+            else if(balance < 0) display.style.color = "#b91c1c"; // Rojo
+            else display.style.color = "#334155";
+        }
+    </script>
+</body>
+</html>
