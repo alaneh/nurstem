@@ -228,19 +228,12 @@ class HistorialConsumo(db.Model):
     paciente = db.relationship('Paciente', backref='consumos')
 
 
-
-
-
-
-
-
-
-
 # --- RUTAS ---
-
+#------INDEX-----------------------------------------
 @app.route('/')
 def index():
     return render_template('index.html') # login
+#----------------------------------------------------
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
@@ -1022,18 +1015,6 @@ def actualizar_progreso():
             flash(f'Error: {str(e)}', 'error')
             
     return redirect(url_for('portal_capacitacion'))
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
